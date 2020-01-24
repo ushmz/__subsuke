@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
+import { Left, Right } from 'native-base';
 
 const styles = StyleSheet.create({
   container: {
@@ -14,9 +15,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
     minHeight: 50,
     borderRadius: 10,
+    flexDirection: 'row'
   },
   text: {
     color: '#333',
+  },
+  name: {
+    textAlign: 'left',
+  },
+  billing: {
+    textAlign: 'right',
   },
 });
 
@@ -25,9 +33,12 @@ const SubscItem = props => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{item.service}</Text>
-      <Text style={styles.text}>{item.charge}</Text>
-      <Text style={styles.text}>{item.next}</Text>
+      <Left>
+        <Text style={styles.name}>{item.service}</Text>
+      </Left>
+      <Right>
+        <Text style={styles.billing}>{item.billing}</Text>
+      </Right>
     </View>
   );
 };

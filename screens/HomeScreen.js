@@ -29,14 +29,15 @@ import {
 
 import Modal from 'react-native-modalbox';
 
+import DatePicker from "../components/DatePicker"
 
-import { MonoText } from '../components/StyledText';
+import SubsucItem from '../components/SubscItem';
 
 export default class HomeScreen extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {list: [], service: '', charge: '', cycle: '', next:''}
+    this.state = {list: [], service: '', billing: '', cycle: '', next:''};
   }
 
   _onPressAdd = e => {
@@ -44,7 +45,7 @@ export default class HomeScreen extends Component {
 
     list.push({
       service: this.state.service,
-      charge: this.state.charge,
+      billing: this.state.billing,
       next: this.state.next,
     });
 
@@ -53,7 +54,7 @@ export default class HomeScreen extends Component {
     this.setState({
       list: list,
       service: '',
-      charge: '',
+      billing: '',
       next: ''
     });
     this.refs.addModal.close()
@@ -73,6 +74,8 @@ export default class HomeScreen extends Component {
   }
 
   render() {
+    var i = 0;
+    this.state.list.map(value => i += +value.billing)
     return (
       <View style={{flex: 1}}>
         {/*Header*/}
@@ -89,14 +92,7 @@ export default class HomeScreen extends Component {
         </Header>
 
           <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../assets/images/robot-dev.png')
-                  : require('../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
-            />
+            <Text>{i}</Text>
           </View>
         {/*
         <ScrollView
@@ -106,7 +102,7 @@ export default class HomeScreen extends Component {
         */}
         <FlatList
           style={styles.container}
-          keyExtractor={item => item.service+item.charge+item.next}
+          keyExtractor={item => item.service+item.billing+item.next}
           data={this.state.list}
           renderItem={({item}) => <SubsucItem {...item} />}
         />
@@ -120,29 +116,30 @@ export default class HomeScreen extends Component {
         </View>
         {/*Modal Contents*/}
         <Modal style={styles.modal} position={'bottom'} ref={'addModal'}>
-          <Header style={styles.modalTitle} noShadow>
-            <Body>
-              <Text>サブスクリプションを追加</Text>
-            </Body>
-            <Right>
-              <Button hasText transparent>
-                <Text>cancel</Text>
-              </Button>
-            </Right>
-          </Header>
+          <View style={{flex: 0.2, alignItems: "center"}}>
+            <Icon type="Entypo" name="chevron-down"></Icon>
+          </View>
+          <View style={{flex: 2.0}}>
             <Form>
-              <Item fixedLabel>
-                <Label>Subscription Name</Label>
-                <Input type="text" name={"service"} value={this.state.service} onChange={this._handleChange} />
+              <Item inlineLabel>
+                <Label></Label>
+                <Input type="text"
+                       name={"service"}
+                       style={{fontSize: 36}}
+                       placeholder={"サブスク名を追加"}
+                       value={this.state.service}
+                       onChange={this._handleChange} />
               </Item>
-              <Item fixedLabel>
-                <Label>Charge</Label>
-                <Input type="text" name={"charge"} value={this.state.charge} onChange={this._handleChange} />
+              <Item inlineLabel>
+                <Label><Icon type="MaterialCommunityIcons" name="wallet"></Icon></Label>
+                <Input type="number"
+                       name={"billing"}
+                       style={{fontSize: 24, margin: 10}}
+                       placeholder={"金額を追加"}
+                       value={this.state.billing}
+                       onChange={this._handleChange} />
               </Item>
-              <Item fixedLabel>
-                <Label>Next Payment</Label>
-                <Input type="text" name="next" value={this.state.next} onChange={this._handleChange} />
-              </Item>
+              <DatePicker />
               <Container style={styles.actionButtons}>
                 <TouchableOpacity style={styles.button} onPress={() => this.refs.addModal.close()}>
                   <Text style={styles.buttonText}>キャンセル</Text>
@@ -152,13 +149,11 @@ export default class HomeScreen extends Component {
                 </TouchableOpacity>
               </Container>
             </Form>
+          </View>
         </Modal>
       </View>
     );
   }
-
-
-
 }
 
 HomeScreen.navigationOptions = {
@@ -310,10 +305,7 @@ const styles = StyleSheet.create({
 
   modal: {
     height: 600,
-  },
-  modalTitle: {
-    backgroundColor: 'transparent',
-    alignItems: 'center',
+    borderTopStartRadius: 10,
   },
   button: {
     flex: 1,
@@ -332,5 +324,4 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 20,
   },
-
 });
