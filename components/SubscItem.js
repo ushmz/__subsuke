@@ -37,7 +37,7 @@ const SubscItem = props => {
         <Text style={styles.name}>{item.service}</Text>
       </Left>
       <Right>
-        <Text style={styles.billing}>{item.billing}</Text>
+        <Text style={styles.billing}>{item.price}</Text>
       </Right>
     </View>
   );

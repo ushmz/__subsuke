@@ -1,4 +1,4 @@
-import { AppLoading } from 'expo';
+import { AppLoading, Expo } from 'expo';
 import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
 import React, { useState } from 'react';
@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import AppNavigator from './navigation/AppNavigator';
 import { ExpoConfigView } from '@expo/samples';
+import HomeScreen from './screens/HomeScreen';
 
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
@@ -30,9 +31,10 @@ export default function App(props) {
 }
 
 async function loadResourcesAsync() {
-  // await Expo.Promise.all([
+  //await Expo.Promise.all([
   await Promise.all([
     Asset.loadAsync([
+      require('./assets/images/icon.png'),
       require('./assets/images/robot-dev.png'),
       require('./assets/images/robot-prod.png'),
     ]),
@@ -43,7 +45,7 @@ async function loadResourcesAsync() {
       // remove this if you are not using it in your app
       'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
       'Roboto_medium': require('./assets/fonts/SpaceMono-Regular.ttf'),
-    }),
+    })
   ]);
 }
 
