@@ -137,13 +137,11 @@ export default class HomeScreen extends Component {
     var proomiseDBSync = function() {
       return new Promise((resolve, reject) => {
         const connection = SQLite.openDatabase('subsuke');
-        connection.transaction(
-          tx => {
+        connection.transaction(tx => {
             tx.executeSql(
               "create table if not exists subscription (\
-                id integer primary key,\
                 service varchar(64) not null,\
-                price integer not null,\
+                price int not null,\
                 cycle varchar(10) not null,\
                 dueDate varchar(64) not null\
               )",
@@ -154,8 +152,9 @@ export default class HomeScreen extends Component {
                 console.log(err);
               },
             );
-          /***************************************************           * delete all items from database.
-           */
+          /***************************************************
+           * delete all items from database.
+           *
             tx.executeSql(
               "delete from subscription",
               null,
@@ -165,16 +164,16 @@ export default class HomeScreen extends Component {
            /**************************************************/
           
            /***************************************************
-           */
+           *
             tx.executeSql(
-              "insert into subscription values(?,?,?,?,?);",
-              [0,'hoge', 900, 'month', '10'],
+              "insert into subscription(service, price, cycle, dueDate) values(?,?,?,?);",
+              ['hoge', 900, 'month', '10'],
               () => {console.log('insert success')},
               () => {console.log('insert failed')}
             );
            /**************************************************/
             tx.executeSql(
-              "select rowid, service, price cycle, dueDate from subscription;",
+              "select rowid, service, price, cycle, dueDate from subscription;",
               null,
               (_, {rows}) => {
                 console.log(rows);
@@ -249,15 +248,6 @@ export default class HomeScreen extends Component {
 
         <UserFlatlist/>
         
-        {/*Modal Sammon Button*/}
-        <View>
-          <TouchableOpacity
-            style={styles.circleButton}
-            onPress={() => this.refs.addModal.open()}>
-            <Text style={{fontSize: 48, color: 'white'}}>+</Text>
-          </TouchableOpacity>
-        </View>
-
         {/*Modal Contents*/}
         <Modal style={styles.modal} position={'bottom'} ref={'addModal'}>
           {/* Header */}
@@ -267,7 +257,7 @@ export default class HomeScreen extends Component {
               <Icon style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}} type="Entypo" name="chevron-down"></Icon>
             </View>
             <TouchableOpacity style={[styles.button, {flex: 0.1}]} onPress={this._onPressAdd} >
-              <Text style={{color: 'white', fontSize: 18, lineHeight: 18}}>追加</Text>
+              <Text style={{color: 'white', fontSize: 18, textAlign: 'center', marginTop: 15}}>追加</Text>
             </TouchableOpacity>
           </View>
 
@@ -294,8 +284,16 @@ export default class HomeScreen extends Component {
               <DatePicker setValue={this.setValue}/>
             </Form>
           </View>
-
         </Modal>
+
+        {/*Modal Sammon Button*/}
+        <View>
+          <TouchableOpacity
+            style={styles.circleButton}
+            onPress={() => this.refs.addModal.open()}>
+            <Text style={{fontSize: 48, color: 'white'}}>+</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -356,7 +354,7 @@ const styles = StyleSheet.create({
     paddingTop: 30,
   },
   welcomeContainer: {
-    flex: 0.2,
+    //flex: 0.2,
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 20,
@@ -435,9 +433,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#87C8FA',
   },
   circleButton: {
-    flex: 1,
+    //flex: 1,
     backgroundColor: 'rgb(93, 43, 136)',
     marginLeft: 5,
+    marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 10,
