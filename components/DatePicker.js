@@ -33,7 +33,7 @@ export default class DatePicker extends Component {
         <Item inlineLabel>
           <Label><Icon type="MaterialCommunityIcons" name="calendar"></Icon></Label>
           <Button transparent onPress={this.show}>
-              <Text style={{fontSize: 18, margin: 20}} >
+              <Text style={{fontSize: 18, margin: 20, color: 'blue'}} >
                 {this.formatDate()}
               </Text>
           </Button>

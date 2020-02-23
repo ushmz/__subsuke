@@ -33,6 +33,8 @@ import Modal from 'react-native-modalbox';
 import DatePicker from "../components/DatePicker"
 
 import SubsucItem from '../components/SubscItem';
+import Swipeout from 'react-native-swipeout';
+import { template } from '@babel/core';
 
 export default class HomeScreen extends Component {
   
@@ -43,7 +45,8 @@ export default class HomeScreen extends Component {
   }
 
   _onPressAdd = () => {
-    let items = [];
+    let demo_items = {};
+    let items = {};
 
     const additional = {
       'service': this.state.service,
@@ -51,18 +54,19 @@ export default class HomeScreen extends Component {
       'cycle': this.state.cycle,
       'dueDate': this.state.dueDate
     };
-    
     const connection = SQLite.openDatabase('subsuke');
     connection.transaction(
       tx => {
         tx.executeSql(
           "insert into subscription(service, price, cycle, dueDate) values(?,?,?,?);",
           [additional['service'], additional['price'], additional['cycle'], additional['dueDate']],
-          (tx, rs) => {
+          (tx, {rows}) => {
             console.log('[_onPressAdd] insert success');
+            demo_items = rows;
           },
           (tx, error) => {
             console.log('[_onPressAdd] failed to insert');
+            console.log(error);
             return true;
           }
         );
@@ -73,11 +77,18 @@ export default class HomeScreen extends Component {
             items = rows;
             console.log('[_onPressAdd] success to collect data.');
           },
-          () => {console.log('[_onPressAdd] Cannot correct data.')}
+          (tx, error) => {
+            console.log('[_onPressAdd] Cannot correct data.');
+            console.log(error);
+            return true;
+          }
         );
       },
       () => {console.log('[_onPressAdd] failed to fetch user list')},
       () => {
+        console.log(demo_items);
+        console.log('-----------');
+        console.log(items);
         this.setState({
           list: items, 
           service: '', 
@@ -91,14 +102,20 @@ export default class HomeScreen extends Component {
   }
 
   _onDelete = (itemId) => {
+    let items = {};
     const connection = SQLite.openDatabase('subsuke');
     connection.transaction(
       tx => {
         tx.executeSql(
-          "delete from subscription where id = ?",
+          "delete from subscription where rowid = ?",
           [itemId],
-          () => {console.log('[_onDelete] successed to delete item')},
-          () => {console.log('[_onDelete] failed to delete item')}
+          (tx, {rows}) => {
+            console.log('[_onDelete] successed to delete item');
+          },
+          (tx, error) => {
+            console.log('[_onDelete] failed to delete item');
+            return true;
+          }
         );
         tx.executeSql(
           'select rowid, service, price cycle, dueDate from subscription;',
@@ -107,11 +124,24 @@ export default class HomeScreen extends Component {
             items = rows;
             console.log('[_onDelete] success to collect data.');
           },
-          () => {console.log('[_onDelete] Cannot correct data.')}
+          (tx, error) => {
+            console.log('[_onDelete] Cannot correct data.');
+            console.log(error);
+            return true;
+          }
         );
       },
-      () => {console.log('[_onDelete] Transaction failed.')},
-      () => {console.log('[_omDelete] Transaction success.')}
+      () => {console.log('[_onDelete] Transaction failed.');},
+      () => {
+        console.log('[_omDelete] Transaction success.');
+        this.setState({
+          list: items, 
+          service: '', 
+          price: '', 
+          cycle: '', 
+          dueDate: ''
+        });
+      }
     )
   } 
 
@@ -133,7 +163,7 @@ export default class HomeScreen extends Component {
 
   componentDidMount() {
     let itemList = {};
-    console.log("3 : connect to db");
+    console.log('start DBSync...');
     var proomiseDBSync = function() {
       return new Promise((resolve, reject) => {
         const connection = SQLite.openDatabase('subsuke');
@@ -146,30 +176,39 @@ export default class HomeScreen extends Component {
                 dueDate varchar(64) not null\
               )",
               null,
-              () => {console.log('[componentDidMount] Successed to connect DB.')},
+              (tx, {rows}) => {
+                console.log('[componentDidMount] Successed to connect DB.');
+              },
               (tx, err) => {
                 console.log('[componentDidMount] Failed to connect DB.');
                 console.log(err);
+                return true;
               },
             );
           /***************************************************
            * delete all items from database.
-           *
+           */
             tx.executeSql(
               "delete from subscription",
               null,
-              () => {console.log('delete success')},
-              () => {console.log('delete failed')}
+              (tx, {rows}) => {console.log('delete success');},
+              (tx, error) => {
+                console.log('delete failed');
+                return true;
+              }
             );
            /**************************************************/
           
            /***************************************************
-           *
+           */
             tx.executeSql(
               "insert into subscription(service, price, cycle, dueDate) values(?,?,?,?);",
               ['hoge', 900, 'month', '10'],
-              () => {console.log('insert success')},
-              () => {console.log('insert failed')}
+              (tx, {rows}) => {console.log('insert success');},
+              (tx, error) => {
+                console.log('insert failed');
+                return true;
+              }
             );
            /**************************************************/
             tx.executeSql(
@@ -182,11 +221,13 @@ export default class HomeScreen extends Component {
               (tx, err) => {
                 console.log('[componentDidMount] Failed to collect data.');
                 console.log(err);
+                return true;
               }
             );
           },
           () => {
-            reject('[componentDidMount] Transaction failed.')
+            reject('[componentDidMount] Transaction failed.');
+            reject({_array: [], length: 0});
           },
           () => {
             console.log('[componentDidMount] Transaction successed.');
@@ -198,6 +239,7 @@ export default class HomeScreen extends Component {
     console.log(itemList);
     proomiseDBSync().then((itemList) => {
       this.setState({list: itemList});
+      console.log('sync complete.');
     }).catch((error) => {
       console.log(error);
     });
@@ -225,7 +267,19 @@ export default class HomeScreen extends Component {
             data={itemList._array}
             style={styles.container}
             keyExtractor={item => item.rowid.toString()}
-            renderItem={({item}) => <SubsucItem {...item} />}
+            renderItem={({item}) => {
+              const swipeBtn = [{
+                text: '削除',
+                backgroundColor: 'red',
+                underlayColor: 'rgba(0,0,0,1)',
+                onPress: () => {this._onDelete(item.rowid.toString())},
+              }];
+              return (
+                <Swipeout right={swipeBtn} autoClose={true} backgroundColor='transparent'>
+                  <SubsucItem {...item} />
+                </Swipeout>
+              );
+            }}
           />
         )
       } else {

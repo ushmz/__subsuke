@@ -4,17 +4,11 @@ import { Left, Right } from 'native-base';
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffa500',
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingLeft: 5,
-    paddingRight: 5,
-    marginBottom: 10,
-    marginRight: 10,
-    marginLeft: 10,
-    marginTop: 10,
-    minHeight: 50,
-    borderRadius: 10,
+    height: 64,
+    //borderTopWidth: 1,
+    borderBottomWidth: 1,
+    //borderTopColor: 'black',
+    borderBottomColor: 'black',
     flexDirection: 'row'
   },
   text: {
