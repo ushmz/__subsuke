@@ -13,12 +13,14 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#333',
+    marginLeft: '5%',
   },
   name: {
-    textAlign: 'left',
+    marginLeft: '10%',
+    fontSize: 20,
   },
   billing: {
-    textAlign: 'right',
+    marginRight: '10%',
   },
 });
 
@@ -31,7 +33,7 @@ const SubscItem = props => {
         <Text style={styles.name}>{item.service}</Text>
       </Left>
       <Right>
-        <Text style={styles.billing}>{item.price}</Text>
+        <Text style={styles.billing}>{'¥ '+item.price}</Text>
       </Right>
     </View>
   );

@@ -20,7 +20,7 @@ export default class DatePicker extends Component {
   handleConfirm = date => {
     this.hide();
     this.setState({selected: date,});
-    this.props.setValue('dueDate', date)
+    this.props.setValue('dueDate', date);
   };
 
   formatDate = () => {
@@ -33,7 +33,7 @@ export default class DatePicker extends Component {
         <Item inlineLabel>
           <Label><Icon type="MaterialCommunityIcons" name="calendar"></Icon></Label>
           <Button transparent onPress={this.show}>
-              <Text style={{fontSize: 18, margin: 20, color: 'blue'}} >
+              <Text style={{fontSize: 18, margin: 20}} >
                 {this.formatDate()}
               </Text>
           </Button>

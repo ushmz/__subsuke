@@ -7,6 +7,7 @@ import {
   Platform,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
   TouchableHighlightBase,
@@ -20,7 +21,6 @@ import {
   Form,
   Header,
   Icon,
-  Input,
   Item,
   Label,
   Left,
@@ -34,7 +34,6 @@ import DatePicker from "../components/DatePicker"
 
 import SubsucItem from '../components/SubscItem';
 import Swipeout from 'react-native-swipeout';
-import { template } from '@babel/core';
 
 export default class HomeScreen extends Component {
   
@@ -45,7 +44,6 @@ export default class HomeScreen extends Component {
   }
 
   _onPressAdd = () => {
-    let demo_items = {};
     let items = {};
 
     const additional = {
@@ -62,7 +60,6 @@ export default class HomeScreen extends Component {
           [additional['service'], additional['price'], additional['cycle'], additional['dueDate']],
           (tx, {rows}) => {
             console.log('[_onPressAdd] insert success');
-            demo_items = rows;
           },
           (tx, error) => {
             console.log('[_onPressAdd] failed to insert');
@@ -86,9 +83,6 @@ export default class HomeScreen extends Component {
       },
       () => {console.log('[_onPressAdd] failed to fetch user list')},
       () => {
-        console.log(demo_items);
-        console.log('-----------');
-        console.log(items);
         this.setState({
           list: items, 
           service: '', 
@@ -145,11 +139,6 @@ export default class HomeScreen extends Component {
     )
   } 
 
-  /* Methods 4 Modal */
-  _handleChange = e => {
-    this.setState({[e._targetInst.pendingProps.name]: e.nativeEvent.text});
-  }
-
   setValue = (stateName, value) => {
     this.setState({[stateName]: value});
   }
@@ -187,7 +176,7 @@ export default class HomeScreen extends Component {
             );
           /***************************************************
            * delete all items from database.
-           */
+           *
             tx.executeSql(
               "delete from subscription",
               null,
@@ -197,20 +186,20 @@ export default class HomeScreen extends Component {
                 return true;
               }
             );
-           /**************************************************/
+           **************************************************/
           
            /***************************************************
-           */
+           *
             tx.executeSql(
               "insert into subscription(service, price, cycle, dueDate) values(?,?,?,?);",
-              ['hoge', 900, 'month', '10'],
+              ['dummy', 900, 'month', '10'],
               (tx, {rows}) => {console.log('insert success');},
               (tx, error) => {
                 console.log('insert failed');
                 return true;
               }
             );
-           /**************************************************/
+           **************************************************/
             tx.executeSql(
               "select rowid, service, price, cycle, dueDate from subscription;",
               null,
@@ -265,7 +254,7 @@ export default class HomeScreen extends Component {
         return (
           <FlatList
             data={itemList._array}
-            style={styles.container}
+            style={styles.flatlist}
             keyExtractor={item => item.rowid.toString()}
             renderItem={({item}) => {
               const swipeBtn = [{
@@ -319,21 +308,21 @@ export default class HomeScreen extends Component {
             <Form>
               <Item inlineLabel>
                 <Label></Label>
-                <Input type="text"
+                <TextInput type="text"
                        name={"service"}
                        style={{fontSize: 36}}
                        placeholder={"サブスク名を追加"}
                        value={this.state.service}
-                       onChange={this._handleChange} />
+                       onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
               <Item inlineLabel>
                 <Label><Icon type="MaterialCommunityIcons" name="wallet"></Icon></Label>
-                <Input type="number"
+                <TextInput type="number"
                        name={"price"}
                        style={{fontSize: 24, margin: 10}}
                        placeholder={"金額を追加"}
                        value={this.state.price}
-                       onChange={this._handleChange} />
+                       onChange={e => {this.setState({price: e.nativeEvent.text})}} />
               </Item>
               <DatePicker setValue={this.setValue}/>
             </Form>
@@ -393,10 +382,6 @@ function handleHelpPress() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1.0,
-    backgroundColor: '#fff',
-  },
   developmentModeText: {
     marginBottom: 20,
     color: 'rgba(0,0,0,0.4)',
@@ -481,8 +466,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2e78b7',
   },
-
+  
   // user settings
+  flatlist: {
+    flex: 1.0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+  },
   header: {
     backgroundColor: '#87C8FA',
   },
