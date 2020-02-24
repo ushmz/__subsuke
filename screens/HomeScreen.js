@@ -25,7 +25,9 @@ import {
   Label,
   Left,
   Right,
+  Picker,
   Title,
+  Input,
 } from 'native-base';
 
 import Modal from 'react-native-modalbox';
@@ -33,121 +35,16 @@ import Modal from 'react-native-modalbox';
 import DatePicker from "../components/DatePicker"
 
 import SubsucItem from '../components/SubscItem';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Swipeout from 'react-native-swipeout';
+import Swiper from 'react-native-swiper';
 
 export default class HomeScreen extends Component {
   
   constructor(props) {
     super(props);
-    this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '', dueDate:''};
+    this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '', due: new Date(), isVisible: false};
     this.setValue = this.setValue.bind(this);
-  }
-
-  _onPressAdd = () => {
-    let items = {};
-
-    const additional = {
-      'service': this.state.service,
-      'price': this.state.price,
-      'cycle': this.state.cycle,
-      'dueDate': this.state.dueDate
-    };
-    const connection = SQLite.openDatabase('subsuke');
-    connection.transaction(
-      tx => {
-        tx.executeSql(
-          "insert into subscription(service, price, cycle, dueDate) values(?,?,?,?);",
-          [additional['service'], additional['price'], additional['cycle'], additional['dueDate']],
-          (tx, {rows}) => {
-            console.log('[_onPressAdd] insert success');
-          },
-          (tx, error) => {
-            console.log('[_onPressAdd] failed to insert');
-            console.log(error);
-            return true;
-          }
-        );
-        tx.executeSql(
-          'select rowid, service, price, cycle, dueDate from subscription;',
-          null,
-          (_, {rows}) => {
-            items = rows;
-            console.log('[_onPressAdd] success to collect data.');
-          },
-          (tx, error) => {
-            console.log('[_onPressAdd] Cannot correct data.');
-            console.log(error);
-            return true;
-          }
-        );
-      },
-      () => {console.log('[_onPressAdd] failed to fetch user list')},
-      () => {
-        this.setState({
-          list: items, 
-          service: '', 
-          price: '', 
-          cycle: '', 
-          dueDate: ''
-        });
-      }
-    );
-    this.refs.addModal.close();
-  }
-
-  _onDelete = (itemId) => {
-    let items = {};
-    const connection = SQLite.openDatabase('subsuke');
-    connection.transaction(
-      tx => {
-        tx.executeSql(
-          "delete from subscription where rowid = ?",
-          [itemId],
-          (tx, {rows}) => {
-            console.log('[_onDelete] successed to delete item');
-          },
-          (tx, error) => {
-            console.log('[_onDelete] failed to delete item');
-            return true;
-          }
-        );
-        tx.executeSql(
-          'select rowid, service, price cycle, dueDate from subscription;',
-          null,
-          (_, {rows}) => {
-            items = rows;
-            console.log('[_onDelete] success to collect data.');
-          },
-          (tx, error) => {
-            console.log('[_onDelete] Cannot correct data.');
-            console.log(error);
-            return true;
-          }
-        );
-      },
-      () => {console.log('[_onDelete] Transaction failed.');},
-      () => {
-        console.log('[_omDelete] Transaction success.');
-        this.setState({
-          list: items, 
-          service: '', 
-          price: '', 
-          cycle: '', 
-          dueDate: ''
-        });
-      }
-    )
-  } 
-
-  setValue = (stateName, value) => {
-    this.setState({[stateName]: value});
-  }
-
-  /* why this does not work? */
-  _handleChangeTest = fieldName => {
-    // this.refs.'fieldname'.value
-    // event.target.value
-    this.setState({fieldName: this.refs[fieldName].value});
   }
 
   componentDidMount() {
@@ -157,12 +54,28 @@ export default class HomeScreen extends Component {
       return new Promise((resolve, reject) => {
         const connection = SQLite.openDatabase('subsuke');
         connection.transaction(tx => {
+          /**************************************************
+           * drop table
+           *
+          tx.executeSql(
+            "drop table subscription",
+            null,
+            (tx, {rows}) => {
+              console.log('[componentDidMount] Successed to drop table.');
+            },
+            (tx, err) => {
+              console.log('[componentDidMount] Failed to drop table.');
+              console.log(err);
+              return true;
+            },
+          );
+          /*************************************************: */
             tx.executeSql(
               "create table if not exists subscription (\
                 service varchar(64) not null,\
                 price int not null,\
                 cycle varchar(10) not null,\
-                dueDate varchar(64) not null\
+                due int not null\
               )",
               null,
               (tx, {rows}) => {
@@ -186,25 +99,25 @@ export default class HomeScreen extends Component {
                 return true;
               }
             );
-           **************************************************/
+           /**************************************************/
           
            /***************************************************
            *
             tx.executeSql(
-              "insert into subscription(service, price, cycle, dueDate) values(?,?,?,?);",
-              ['dummy', 900, 'month', '10'],
+              "insert into subscription(service, price, cycle, due) values(?,?,?,?);",
+              ['dummy', 900, 'month', 10],
               (tx, {rows}) => {console.log('insert success');},
               (tx, error) => {
                 console.log('insert failed');
+                console.log(error);
                 return true;
               }
             );
-           **************************************************/
+           /**************************************************/
             tx.executeSql(
-              "select rowid, service, price, cycle, dueDate from subscription;",
+              "select rowid, service, price, cycle, due from subscription;",
               null,
               (_, {rows}) => {
-                console.log(rows);
                 itemList = rows;
               },
               (tx, err) => {
@@ -225,7 +138,6 @@ export default class HomeScreen extends Component {
         );
       })
     };
-    console.log(itemList);
     proomiseDBSync().then((itemList) => {
       this.setState({list: itemList});
       console.log('sync complete.');
@@ -234,23 +146,159 @@ export default class HomeScreen extends Component {
     });
   }
 
+  _onPressAdd = () => {
+    let items = {};
+
+    const additional = {
+      'service': this.state.service,
+      'price': this.state.price,
+      'cycle': this.state.cycle,
+      'due': this.handleDuedate(this.state.due)
+    };
+
+    const connection = SQLite.openDatabase('subsuke');
+    connection.transaction(
+      tx => {
+        tx.executeSql(
+          "insert into subscription(service, price, cycle, due) values(?,?,?,?);",
+          [additional['service'], additional['price'], additional['cycle'], additional['due']],
+          (tx, {rows}) => {
+            console.log('[_onPressAdd] insert success');
+          },
+          (tx, error) => {
+            console.log('[_onPressAdd] failed to insert');
+            console.log(error);
+            return true;
+          }
+        );
+        tx.executeSql(
+          'select rowid, service, price, cycle, due from subscription;',
+          null,
+          (_, {rows}) => {
+            items = rows;
+            console.log('[_onPressAdd] success to collect data.');
+          },
+          (tx, error) => {
+            console.log('[_onPressAdd] Cannot correct data.');
+            console.log(error);
+            return true;
+          }
+        );
+      },
+      () => {console.log('[_onPressAdd] failed to fetch user item')},
+      () => {
+        this.setState({
+          list: items, 
+          service: '', 
+          price: '', 
+          cycle: '', 
+          due: new Date()
+        });
+      }
+    );
+    this.refs.addModal.close();
+  }
+
+  _onDelete = (itemId) => {
+    let items = {};
+    const connection = SQLite.openDatabase('subsuke');
+    connection.transaction(
+      tx => {
+        tx.executeSql(
+          "delete from subscription where rowid = ?",
+          [itemId],
+          (tx, {rows}) => {
+            console.log('[_onDelete] successed to delete item');
+          },
+          (tx, error) => {
+            console.log('[_onDelete] failed to delete item');
+            return true;
+          }
+        );
+        tx.executeSql(
+          'select rowid, service, price, cycle, due from subscription;',
+          null,
+          (_, {rows}) => {
+            items = rows;
+            console.log('[_onDelete] success to collect data.');
+          },
+          (tx, error) => {
+            console.log('[_onDelete] Cannot correct data.');
+            console.log(error);
+            return true;
+          }
+        );
+      },
+      () => {console.log('[_onDelete] Transaction failed.');},
+      () => {
+        console.log('[_omDelete] Transaction success.');
+        this.setState({
+          list: items, 
+          service: '', 
+          price: '', 
+          cycle: '', 
+          due: new Date()
+        });
+      }
+    )
+  } 
+
+  setValue = (stateName, value) => {
+    this.setState({[stateName]: value});
+  };
+
+  handleDuedate = (input) => {
+    // execute in _onPressAdd()
+    // this use the value of state[cycle]
+    let duedate = '';
+    if (this.state.cycle === '週') {
+      duedate = input.getDay();
+    } else if (this.state.cycle === '月') {
+      duedate = input.getDate();
+    } else if (this.state.cycle === '年') {
+      duedate = (input.getMonth()+1)*100 + input.getDate();
+    }
+    //this.setState({due: duedate});
+    return duedate;
+  };
+
+  handleConfirm = date => {
+    this.setState({isVisible: false});
+    this.setState({due: date});
+  };
+
+  formatDate = () => {
+      return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + this.state.due.getDate() + "日"
+  }
+
   render() {
     const itemList = this.state.list;
     var totalCost = 0;
+    var totalWeeklyCost = 0;
+    var totalMonthlyCost = 0;
+    var totalYearlyCost = 0;
     
     if ((itemList.length) !== 0 ){
-        itemList._array.reduce((acu, current) => {
+        itemList._array.forEach((current) => {
+          if (current.cycle === '週') {
+            totalWeeklyCost += parseInt(current.price);
+            totalMonthlyCost += parseInt(current.price)*4;
+            totalYearlyCost += parseInt(current.price)*4*12;
+          } else if (current.cycle === '月') {
+            totalWeeklyCost += parseInt(current.price)/4;
+            totalMonthlyCost += parseInt(current.price);
+            totalYearlyCost += parseInt(current.price)*12;
+          } else if (current.cycle === '年') {
+            totalWeeklyCost += parseInt(current.price)/12/4;
+            totalMonthlyCost += parseInt(current.price)/12;
+            totalYearlyCost += parseInt(current.price);
+          }
           totalCost += parseInt(current.price);
-        },totalCost);
+        });
     }
 
     let UserFlatlist = () => {
       if (itemList.length !== 0) {
-        itemList._array.forEach(
-          (item) => {
-            console.log(item);
-          }
-        );
         return (
           <FlatList
             data={itemList._array}
@@ -272,7 +320,7 @@ export default class HomeScreen extends Component {
           />
         )
       } else {
-        return <Text>登録済みのサービスはありません</Text>            
+        return <Text style={{textAlign: 'center'}}>登録済みのサービスはありません</Text>            
       }
     }
 
@@ -286,10 +334,21 @@ export default class HomeScreen extends Component {
         </Header>
 
           <View style={styles.welcomeContainer}>
-            <Text>{totalCost}</Text>
+            <Swiper style={styles.wrapper} showsButtons={true}>
+              <View style={styles.slide}>
+                <Text>{'週あたり  ¥' + totalWeeklyCost}</Text>
+              </View>
+              <View style={styles.slide}>
+                <Text>{'月あたり  ¥' + totalMonthlyCost}</Text>
+              </View>
+              <View style={styles.slide}>
+                <Text>{'年あたり  ¥' + totalYearlyCost}</Text>
+              </View>
+            </Swiper>
+
           </View>
 
-        <UserFlatlist/>
+        <UserFlatlist />
         
         {/*Modal Contents*/}
         <Modal style={styles.modal} position={'bottom'} ref={'addModal'}>
@@ -299,14 +358,14 @@ export default class HomeScreen extends Component {
             <View style={{flex: 0.8}} >
               <Icon style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}} type="Entypo" name="chevron-down"></Icon>
             </View>
-            <TouchableOpacity style={[styles.button, {flex: 0.1}]} onPress={this._onPressAdd} >
+            <TouchableOpacity style={[styles.button, {flex: 0.1, marginRight: '1%'}]} onPress={this._onPressAdd} >
               <Text style={{color: 'white', fontSize: 18, textAlign: 'center', marginTop: 15}}>追加</Text>
             </TouchableOpacity>
           </View>
 
           <View style={{flex: 2.0}}>
             <Form>
-              <Item inlineLabel>
+              <Item >
                 <Label></Label>
                 <TextInput type="text"
                        name={"service"}
@@ -315,7 +374,7 @@ export default class HomeScreen extends Component {
                        value={this.state.service}
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
-              <Item inlineLabel>
+              <Item >
                 <Label><Icon type="MaterialCommunityIcons" name="wallet"></Icon></Label>
                 <TextInput type="number"
                        name={"price"}
@@ -324,13 +383,43 @@ export default class HomeScreen extends Component {
                        value={this.state.price}
                        onChange={e => {this.setState({price: e.nativeEvent.text})}} />
               </Item>
-              <DatePicker setValue={this.setValue}/>
+
+              <Item Picker>
+                <Label><Icon type="Entypo" name="cycle"></Icon></Label>
+                <Picker mdoe={'dropdown'} prompt={'支払いサイクル'} placeholder={'支払いサイクル'} selectedValue={this.state.cycle} onValueChange={(value) => {this.setState({cycle: value})}}>
+                  <Picker.Item label={'毎週'} value={'週'} />
+                  <Picker.Item label={'毎月'} value={'月'} />
+                  <Picker.Item label={'毎年'} value={'年'} />
+                </Picker>
+              </Item>
+
+              <View>
+                <Item >
+                  <Label><Icon type="MaterialCommunityIcons" name="calendar"></Icon></Label>
+                  <Button transparent onPress={() => {this.setState({isVisible: true})}}>
+                      <Text style={{fontSize: 18 }} >
+                        {this.formatDate()}
+                      </Text>
+                  </Button>
+                  <DateTimePickerModal
+                      cancelTextIOS={"キャンセル"}
+                      confirmTextIOS={"OK"}
+                      headerTextIOS={"日付を選択"}
+                      isVisible={this.state.isVisible}
+                      isDarkModeEnabled={false}
+                      mode="date"
+                      onConfirm={this.handleConfirm}
+                      onCancel={() => {this.setState({isVisible: false})}}
+                      locale="ja"
+                  />
+                </Item>
+              </View>
             </Form>
           </View>
         </Modal>
 
         {/*Modal Sammon Button*/}
-        <View>
+        <View style={{top: '85%', left: '70%', position: 'absolute', }}>
           <TouchableOpacity
             style={styles.circleButton}
             onPress={() => this.refs.addModal.open()}>
@@ -397,6 +486,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 20,
+    height: '20%',
   },
   welcomeImage: {
     width: 100,
@@ -477,14 +567,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#87C8FA',
   },
   circleButton: {
-    //flex: 1,
     backgroundColor: 'rgb(93, 43, 136)',
-    marginLeft: 5,
-    marginBottom: 10,
+    //marginLeft: 5,
+    //marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 10,
-    paddingBottom: 10,
+    //paddingTop: 10,
+    //paddingBottom: 10,
     height: 70,
     width: 70,
     borderRadius: 120,
@@ -513,5 +602,19 @@ const styles = StyleSheet.create({
   right: {
     width: '10%',
     //alignItems: 'flex-end',
+  },
+  textInput: {
+    borderRadius: 10,
+    borderColor: 'black',
+    borderWidth: 1,
+    fontSize: 36,
+    marginHorizontal: '10%',
+    marginVertical: '10%',
+    textAlign: 'center',
+  },
+  wrapper:{},
+  slide: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
