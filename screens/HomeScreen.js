@@ -2,7 +2,6 @@ import * as WebBrowser from 'expo-web-browser';
 import * as SQLite from 'expo-sqlite';
 import React, { Component } from 'react';
 import {
-  AsyncStorage,
   FlatList,
   Platform,
   StyleSheet,
@@ -10,14 +9,11 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  TouchableHighlightBase,
 } from 'react-native';
 
 import {
   Body,
   Button,
-  Container,
-  Content,
   Form,
   Header,
   Icon,
@@ -27,12 +23,9 @@ import {
   Right,
   Picker,
   Title,
-  Input,
 } from 'native-base';
 
 import Modal from 'react-native-modalbox';
-
-import DatePicker from "../components/DatePicker"
 
 import SubsucItem from '../components/SubscItem';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -377,6 +370,7 @@ export default class HomeScreen extends Component {
               <Item >
                 <Label><Icon type="MaterialCommunityIcons" name="wallet"></Icon></Label>
                 <TextInput type="number"
+                       keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
                        name={"price"}
                        style={{fontSize: 24, margin: 10}}
                        placeholder={"金額を追加"}

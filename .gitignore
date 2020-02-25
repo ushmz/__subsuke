@@ -18,3 +18,4 @@ debug/
 *.code-workspace
 
 db.json
+*services.json

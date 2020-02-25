@@ -24,7 +24,8 @@
       "**/*"
     ],
     "android": {
-      "package": "com.subsuke.subsuke"
+      "package": "com.subsuke.subsuke",
+      "googleServicesFile": "./google-services.json"
     },
     "ios": {
       "bundleIdentifier": "com.subsuke.subsuke",

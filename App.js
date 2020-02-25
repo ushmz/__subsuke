@@ -1,4 +1,4 @@
-import { AppLoading, Expo } from 'expo';
+import { AppLoading } from 'expo';
 import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
 import React, { useState } from 'react';
@@ -6,8 +6,6 @@ import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import AppNavigator from './navigation/AppNavigator';
-import { ExpoConfigView } from '@expo/samples';
-import HomeScreen from './screens/HomeScreen';
 
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
@@ -58,6 +56,7 @@ function handleLoadingError(error) {
 function handleFinishLoading(setLoadingComplete) {
   setLoadingComplete(true);
 }
+
 
 const styles = StyleSheet.create({
   container: {
