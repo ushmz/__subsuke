@@ -16,19 +16,18 @@ SUBSUKE
 ┣ .expo_-shared
 ┣ assets
 ┃   ┣ fonts
-┃   ┃   ┗ SpaceMono-Regular.ttf
-┃   ┗ images                        #アプリのアイコンの画像が格納されている。割愛。
+┃   ┗ images                    #アプリのアイコンの画像が格納されている。割愛。
 ┃
-┣ components                        #アプリ上のUIのパーツ　ほぼ清水さんの自作or改変
+┣ components                    #アプリ上のUIのパーツ　ほぼ清水さんの自作or改変
 ┃   ┣ _tests_
 ┃   ┣ AddModal.js
 ┃   ┣ DatePicker.js
 ┃   ┣ NotificationHandler.js
 ┃   ┣ NotificationRegister.js
-┃   ┣ StyledText.js                 #デフォルトで存在
+┃   ┣ StyledText.js             #デフォルトで存在
 ┃   ┣ SubscItem.js
 ┃   ┣ Subscription.js
-┃   ┗ TabBarIcon.js                 #デフォルトで存在
+┃   ┗ TabBarIcon.js             #デフォルトで存在
 ┃
 ┣ constants
 ┃   ┣ Colors.js
@@ -39,9 +38,9 @@ SUBSUKE
 ┃   ┣ AppNavigator.web.js
 ┃   ┗ MainTabNavigator.js 
 ┃
-┣ node_modules                      #使用しているパッケージが格納。大量
+┣ node_modules                  #使用しているパッケージが格納。大量
 ┣ screens
-┃   ┣ HomeScreen.js                 #アプリのメインの画面
+┃   ┣ HomeScreen.js             #アプリのメインの画面
 ┃   ┣ LinkScreen.js
 ┃   ┗ SettingScreen.js 
 ┃
