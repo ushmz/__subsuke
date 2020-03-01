@@ -49,5 +49,5 @@ SUBSUKE
 ┣ app.json
 ┣ babel.config.js
 ┣ package-lock.json
-┣ package.json
+┗ package.json
 ```
