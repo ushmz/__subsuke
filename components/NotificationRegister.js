@@ -1,9 +1,9 @@
-import Notifications from 'expo';
+import {Notifications} from 'expo';
 import * as Permissions from 'expo-permissions';
 
 export default async function registerForPushNotificationsAsync() {
 
-  const PUSH_ENDPOINT = 'https://your-server.com/users/push-token';
+  const PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/token';
 
   const { status: existingStatus } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
   let finalStatus = existingStatus;
@@ -20,9 +20,10 @@ export default async function registerForPushNotificationsAsync() {
 
   // Get the token that identifies this device
   let token = await Notifications.getExpoPushTokenAsync();
+  console.log('token: ' + token)
 
   // POST the token to your backend server from where you can retrieve it to send push notifications.
-  return fetch(PUSH_ENDPOINT, {
+  resp = fetch(PUSH_ENDPOINT, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -36,5 +37,10 @@ export default async function registerForPushNotificationsAsync() {
         username: 'rabhareit',
       },
     }),
+  });
+
+  return new Promise((resolve, reject) => {
+    resolve(token);
+    reject('Failed to fetch responce.');
   });
 };

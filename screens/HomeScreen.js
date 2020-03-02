@@ -25,18 +25,19 @@ import {
   Title,
 } from 'native-base';
 
-import Modal from 'react-native-modalbox';
-
-import SubsucItem from '../components/SubscItem';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Modal from 'react-native-modalbox';
 import Swipeout from 'react-native-swipeout';
 import Swiper from 'react-native-swiper';
+
+import registerForPushNotificationsAsync from '../components/NotificationRegister'
+import SubsucItem from '../components/SubscItem';
 
 export default class HomeScreen extends Component {
   
   constructor(props) {
     super(props);
-    this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '', due: new Date(), isVisible: false};
+    this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
   }
 
@@ -44,7 +45,7 @@ export default class HomeScreen extends Component {
     let itemList = {};
     console.log('start DBSync...');
     var proomiseDBSync = function() {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {        
         const connection = SQLite.openDatabase('subsuke');
         connection.transaction(tx => {
           /**************************************************
@@ -92,9 +93,9 @@ export default class HomeScreen extends Component {
                 return true;
               }
             );
-           /**************************************************/
+          /**************************************************/
           
-           /***************************************************
+          /***************************************************
            *
             tx.executeSql(
               "insert into subscription(service, price, cycle, due) values(?,?,?,?);",
@@ -106,7 +107,7 @@ export default class HomeScreen extends Component {
                 return true;
               }
             );
-           /**************************************************/
+          /**************************************************/
             tx.executeSql(
               "select rowid, service, price, cycle, due from subscription;",
               null,
@@ -131,9 +132,16 @@ export default class HomeScreen extends Component {
         );
       })
     };
+
     proomiseDBSync().then((itemList) => {
       this.setState({list: itemList});
       console.log('sync complete.');
+    }).catch((error) => {
+      console.log(error);
+    });
+
+    registerForPushNotificationsAsync().then((token) => {
+      this.setState({token: token});
     }).catch((error) => {
       console.log(error);
     });
@@ -148,6 +156,28 @@ export default class HomeScreen extends Component {
       'cycle': this.state.cycle,
       'due': this.handleDuedate(this.state.due)
     };
+
+    const PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification'
+    fetch(PUSH_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        token: {
+          value: this.state.token,
+        },
+        user: {
+          username: 'rabhareit',
+        },
+        notification: {
+          message: 'もうすぐ'+this.state.service+'のお支払日です．',
+          cycle: this.state.cycle,
+          date: this.state.due,
+        },
+      }),
+    });
 
     const connection = SQLite.openDatabase('subsuke');
     connection.transaction(
