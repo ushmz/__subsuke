@@ -1,4 +1,5 @@
 import React from 'react';
+import SectionList from 'react-native';
 import { ExpoConfigView } from '@expo/samples';
 
 export default function SettingsScreen() {
