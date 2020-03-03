@@ -185,7 +185,9 @@ export default class HomeScreen extends Component {
         tx.executeSql(
           "insert into subscription(service, price, cycle, due) values(?,?,?,?);",
           [additional['service'], additional['price'], additional['cycle'], additional['due']],
-          (tx, {rows}) => {
+          (tx, resultset) => {
+            // Args : (tx, {rows})
+            console.log(resultset);
             console.log('[_onPressAdd] insert success');
           },
           (tx, error) => {
