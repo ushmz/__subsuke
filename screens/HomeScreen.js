@@ -39,6 +39,7 @@ export default class HomeScreen extends Component {
     super(props);
     this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
+    this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
   }
 
   componentDidMount() {
@@ -157,28 +158,6 @@ export default class HomeScreen extends Component {
       'due': this.handleDuedate(this.state.due)
     };
 
-    const PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification'
-    fetch(PUSH_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        token: {
-          value: this.state.token,
-        },
-        user: {
-          username: 'rabhareit',
-        },
-        notification: {
-          message: 'もうすぐ'+this.state.service+'のお支払日です．',
-          cycle: this.state.cycle,
-          date: this.state.due,
-        },
-      }),
-    });
-
     const connection = SQLite.openDatabase('subsuke');
     connection.transaction(
       tx => {
@@ -187,7 +166,7 @@ export default class HomeScreen extends Component {
           [additional['service'], additional['price'], additional['cycle'], additional['due']],
           (tx, resultset) => {
             // Args : (tx, {rows})
-            console.log(resultset);
+            rowid = resultset['insertId'];
             console.log('[_onPressAdd] insert success');
           },
           (tx, error) => {
@@ -219,6 +198,29 @@ export default class HomeScreen extends Component {
           cycle: '', 
           due: new Date()
         });
+
+        fetch(this.PUSH_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: {
+              value: this.state.token,
+            },
+            user: {
+              username: 'rabhareit',
+            },
+            notification: {
+              message: 'もうすぐ'+this.state.service+'のお支払日です．',
+              cycle: this.state.cycle,
+              date: this.state.due,
+              rowid: rowid,
+            },
+          }),
+        });
+    
       }
     );
     this.refs.addModal.close();
@@ -263,6 +265,25 @@ export default class HomeScreen extends Component {
           price: '', 
           cycle: '', 
           due: new Date()
+        });
+
+        fetch(this.PUSH_ENDPOINT+'/'+rowid, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: {
+              value: this.state.token,
+            },
+            user: {
+              username: 'rabhareit',
+            },
+            notification: {
+              rowid: rowid,
+            },
+          }),
         });
       }
     )
