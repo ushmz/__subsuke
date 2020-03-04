@@ -149,6 +149,7 @@ export default class HomeScreen extends Component {
   }
 
   _onPressAdd = () => {
+    let rowid;
     let items = {};
 
     const additional = {
@@ -167,7 +168,7 @@ export default class HomeScreen extends Component {
           (tx, resultset) => {
             // Args : (tx, {rows})
             rowid = resultset['insertId'];
-            console.log('[_onPressAdd] insert success');
+            console.log('[_onPressAdd] insert success (insert ID : ' + rowid+')');
           },
           (tx, error) => {
             console.log('[_onPressAdd] failed to insert');
@@ -199,7 +200,7 @@ export default class HomeScreen extends Component {
           due: new Date()
         });
 
-        fetch(this.PUSH_ENDPOINT, {
+        let resp = fetch(this.PUSH_ENDPOINT, {
           method: 'POST',
           headers: {
             Accept: 'application/json',
@@ -220,20 +221,19 @@ export default class HomeScreen extends Component {
             },
           }),
         });
-    
       }
     );
     this.refs.addModal.close();
   }
 
-  _onDelete = (itemId) => {
+  _onDelete = (rowid) => {
     let items = {};
     const connection = SQLite.openDatabase('subsuke');
     connection.transaction(
       tx => {
         tx.executeSql(
           "delete from subscription where rowid = ?",
-          [itemId],
+          [rowid],
           (tx, {rows}) => {
             console.log('[_onDelete] successed to delete item');
           },
