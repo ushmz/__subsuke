@@ -192,13 +192,6 @@ export default class HomeScreen extends Component {
       },
       () => {console.log('[_onPressAdd] failed to fetch user item')},
       () => {
-        this.setState({
-          list: items, 
-          service: '', 
-          price: '', 
-          cycle: '', 
-          due: new Date()
-        });
 
         let resp = fetch(this.PUSH_ENDPOINT, {
           method: 'POST',
@@ -220,6 +213,14 @@ export default class HomeScreen extends Component {
               rowid: rowid,
             },
           }),
+        });
+
+        this.setState({
+          list: items, 
+          service: '', 
+          price: '', 
+          cycle: '', 
+          due: new Date()
         });
       }
     );
@@ -259,14 +260,7 @@ export default class HomeScreen extends Component {
       () => {console.log('[_onDelete] Transaction failed.');},
       () => {
         console.log('[_omDelete] Transaction success.');
-        this.setState({
-          list: items, 
-          service: '', 
-          price: '', 
-          cycle: '', 
-          due: new Date()
-        });
-
+        
         fetch(this.PUSH_ENDPOINT+'/'+rowid, {
           method: 'POST',
           headers: {
@@ -284,6 +278,14 @@ export default class HomeScreen extends Component {
               rowid: rowid,
             },
           }),
+        });
+
+        this.setState({
+          list: items, 
+          service: '', 
+          price: '', 
+          cycle: '', 
+          due: new Date()
         });
       }
     )

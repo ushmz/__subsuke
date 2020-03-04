@@ -23,7 +23,7 @@ class ConfigView extends React.Component {
       { data: [{ value: 'beta' }], title: 'version' },
       { data: [{ value: 'Yusuke Shimizu' }], title: 'Auther' },
       {
-        data: [{ value: '@rabhare6it' }],
+        data: [{ value: '@rabhareit' }],
         title: 'Github',
       },
       {
