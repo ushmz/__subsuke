@@ -19,7 +19,7 @@
     },
     "updates": {
       "enabled": true,
-      "fallbackToCacheTimeout": 5000
+      "fallbackToCacheTimeout": 10000
     },
     "assetBundlePatterns": [
       "**/*"
