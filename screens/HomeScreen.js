@@ -261,23 +261,8 @@ export default class HomeScreen extends Component {
       () => {
         console.log('[_omDelete] Transaction success.');
         
-        fetch(this.PUSH_ENDPOINT+'/'+rowid+'-'+this.state.token, {
+        fetch(this.PUSH_ENDPOINT+'/'+rowid+':'+this.state.token, {
           method: 'DELETE',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: {
-              value: this.state.token,
-            },
-            user: {
-              username: 'rabhareit',
-            },
-            notification: {
-              rowid: rowid,
-            },
-          }),
         });
 
         this.setState({
