@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
+import { Appearance } from 'react-native-appearance';
 
 export default function LinksScreen() {
   return (
@@ -22,6 +23,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 15,
-    backgroundColor: '#fff',
+    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(65,65,65)':'#fff',
   },
 });

@@ -22,12 +22,11 @@ export default function App(props) {
       </AppearanceProvider>
     );
   } else {
-    let scheme = Appearance.getColorScheme();
-    console.log(scheme);
+    let barStyle = Appearance.getColorScheme() === 'dark' ? 'light-content' : 'dark-content';
     return (
       <AppearanceProvider>
         <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+          {Platform.OS === 'ios' && <StatusBar barStyle={barStyle} />}
           <AppNavigator />
         </View>
       </AppearanceProvider>
@@ -68,6 +67,6 @@ function handleFinishLoading(setLoadingComplete) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(65,65,65)':'#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff',
   },
 });

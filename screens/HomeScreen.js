@@ -361,7 +361,7 @@ export default class HomeScreen extends Component {
     return (
       <View style={this.scheme==='dark' ? {backgroundColor: 'rgb(65,65,65)', flex: 1} : {flex: 1} }>
         {/*Header*/}
-        <Header style={styles.header} transparent>
+        <Header style={{backgroundColor: this.scheme==='dark'?'rgb(188, 135, 255)':'rgb(98,0,238)'}} transparent>
           <Body>
             <Title style={{marginLeft: '5%'}}>Subsuke</Title>
           </Body>
@@ -388,9 +388,18 @@ export default class HomeScreen extends Component {
         <Modal style={styles.modal} position={'bottom'} ref={'addModal'}>
           {/* Header */}
           <View style={{flex: 0.2, flexDirection: "row"}}>
-            <Icon style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} name="close" size={32} onPress={() => this.refs.addModal.close()}></Icon>
+            <Icon 
+              style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} 
+              name="close"
+              size={32}
+              color={this.scheme==='dark'?'#fff':'#000'}
+              onPress={() => this.refs.addModal.close()}></Icon>
             <View style={{flex: 0.8}} >
-              <Icon style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}} name="chevron-down" size={32}></Icon>
+              <Icon
+                style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}}
+                name="chevron-down"
+                size={32}
+                color={this.scheme==='dark'?'#a0a0a0':'#000'}></Icon>
             </View>
             <TouchableOpacity style={[styles.button, {flex: 0.1, marginRight: '1%'}]} onPress={this._onPressAdd} >
               <Text style={{color: 'white', fontSize: 18, textAlign: 'center', marginTop: 15}}>追加</Text>
@@ -409,19 +418,35 @@ export default class HomeScreen extends Component {
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
               <Item >
-                <Label><Icon name="wallet" size={32}></Icon></Label>
+                <Label><Icon name="wallet" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
                 <TextInput type="number"
                        keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
                        name={"price"}
                        style={{fontSize: 24, margin: 10}}
                        placeholder={"金額を追加"}
+                       placeholderTextColor={this.scheme==='dark'?'#a0a0a0':'#000'}
                        value={this.state.price}
                        onChange={e => {this.setState({price: e.nativeEvent.text})}} />
               </Item>
 
               <Item Picker>
-                <Label><Icon name="cached" size={32}></Icon></Label>
-                <Picker mdoe={'dropdown'} prompt={'支払いサイクル'} placeholder={'支払いサイクル'} selectedValue={this.state.cycle} onValueChange={(value) => {this.setState({cycle: value})}}>
+                <Label><Icon name="cached" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
+                <Picker 
+                  itemStyle={{backgroundColor: this.scheme==='dark'?'rgb(65,65,65)':'#fff'}}
+                  iosHeader={'支払いサイクル'}
+                  headerStyle={{backgroundColor: this.scheme==='dark'?'#000':'#fff'}}
+                  headerTitleStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
+                  headerBackButtonText={'戻る'}
+                  //headerBackButtonTextStyle={}
+                  modalStyle={{backgroundColor: this.scheme==='dark'?'rgb(65,65,65)':'#fff'}}
+                  mdoe={'dropdown'}
+                  prompt={'支払いサイクル'} 
+                  placeholder={'支払いサイクル'}
+                  placeholderStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
+                  textStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
+                  itemTextStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
+                  selectedValue={this.state.cycle} 
+                  onValueChange={(value) => {this.setState({cycle: value})}}>
                   <Picker.Item label={'毎週'} value={'週'} />
                   <Picker.Item label={'毎月'} value={'月'} />
                   <Picker.Item label={'毎年'} value={'年'} />
@@ -430,11 +455,11 @@ export default class HomeScreen extends Component {
 
               <View>
                 <Item >
-                  <Label><Icon name="calendar" size={32}></Icon></Label>
+                  <Label><Icon name="calendar" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
                   <View style={{flexDirection:'column', marginTop:5, marginLeft:10}}>
-                    <Text>次のお支払日</Text>
+                    <Text style={{color: this.scheme==='dark'?'#fff':'#000'}}>次のお支払日</Text>
                     <Button transparent onPress={() => {this.setState({isVisible: true})}}>
-                        <Text style={{fontSize: 18 }} >
+                        <Text style={{fontSize: 18, color: this.scheme==='dark'?'#fff':'#000'}} >
                           {this.formatDate()}
                         </Text>
                     </Button>
@@ -445,6 +470,7 @@ export default class HomeScreen extends Component {
                         isVisible={this.state.isVisible}
                         isDarkModeEnabled={true}
                         mode="date"
+                        minimumDate={this.state.due}
                         onConfirm={this.handleConfirm}
                         onCancel={() => {this.setState({isVisible: false})}}
                         locale="ja"
@@ -600,9 +626,6 @@ const styles = StyleSheet.create({
     flex: 1.0,
     backgroundColor: '#fff',
     borderTopWidth: 1,
-  },
-  header: {
-    backgroundColor: '#87C8FA',
   },
   circleButton: {
     backgroundColor: 'rgb(93, 43, 136)',

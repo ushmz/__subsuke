@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {SectionList, StyleSheet, Text, View} from 'react-native';
-import { ExpoConfigView } from '@expo/samples';
+import { Appearance } from 'react-native-appearance';
 
 export default function SettingsScreen() {
   /**
@@ -8,7 +8,6 @@ export default function SettingsScreen() {
    * we just wanted to give you a quick view of your config.
    */
 
-  console.log(typeof(<ConfigView />));
   return <ConfigView />;
 }
 
@@ -22,14 +21,8 @@ class ConfigView extends React.Component {
     const sections = [
       { data: [{ value: 'beta' }], title: 'version' },
       { data: [{ value: 'Yusuke Shimizu' }], title: 'Auther' },
-      {
-        data: [{ value: '@rabhareit' }],
-        title: 'Github',
-      },
-      {
-        data: [{ value: 'subsuke.app@gmail.com' }],
-        title: 'Contact',
-      },
+      { data: [{ value: '@rabhareit' }], title: 'Github' },
+      { data: [{ value: 'subsuke.app@gmail.com' }], title: 'Contact' },
     ];
 
     return (
@@ -61,30 +54,6 @@ class ConfigView extends React.Component {
     }
   };
 
-};
-
-const ListHeader = () => {
-  const { manifest } = Constants;
-
-  return (
-    <View style={styles.titleContainer}>
-      <View style={styles.titleIconContainer}>
-        <AppIconPreview iconUrl={manifest.iconUrl} />
-      </View>
-
-      <View style={styles.titleTextContainer}>
-        <Text style={styles.nameText} numberOfLines={1}>
-          {manifest.name}
-        </Text>
-
-        <Text style={styles.slugText} numberOfLines={1}>
-          {manifest.slug}
-        </Text>
-
-        <Text style={styles.descriptionText}>{manifest.description}</Text>
-      </View>
-    </View>
-  );
 };
 
 const SectionHeader = ({ title }) => {
@@ -125,7 +94,7 @@ const Color = ({ value }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(65,65,65)':'#fff',
   },
   titleContainer: {
     paddingHorizontal: 15,
@@ -138,14 +107,15 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   sectionHeaderContainer: {
-    backgroundColor: '#fbfbfb',
+    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(45,45,45)':'#fbfbfb',
     paddingVertical: 8,
     paddingHorizontal: 15,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#ededed',
+    //borderWidth: StyleSheet.hairlineWidth,
+    //borderColor: '#ededed',
   },
   sectionHeaderText: {
     fontSize: 14,
+    color: 'white',
   },
   sectionContentContainer: {
     paddingTop: 8,
@@ -155,20 +125,6 @@ const styles = StyleSheet.create({
   sectionContentText: {
     color: '#808080',
     fontSize: 14,
-  },
-  nameText: {
-    fontWeight: '600',
-    fontSize: 18,
-  },
-  slugText: {
-    color: '#a39f9f',
-    fontSize: 14,
-    backgroundColor: 'transparent',
-  },
-  descriptionText: {
-    fontSize: 14,
-    marginTop: 6,
-    color: '#4d4d4d',
   },
   colorContainer: {
     flexDirection: 'row',
