@@ -43,12 +43,12 @@ export default class HomeScreen extends Component {
   }
 
   componentDidMount() {
-    ```
-    コンポーネントがマウントされたときに呼び出される．初期化として以下の3点を行う．
-    - データベースへの接続，(なければ作成)
-    - データベースの内容をアイテムリスト(State)に反映
-    - プッシュトークンの登録．
-    ```
+    /**
+     * コンポーネントがマウントされたときに呼び出される．初期化として以下の3点を行う．
+     *   - データベースへの接続，(なければ作成)
+     *   - データベースの内容をアイテムリスト(State)に反映
+     *   - プッシュトークンの登録．(TODO:アプリ起動時に移動)
+     */
     let itemList = {};
     console.log('start DBSync...');
     var proomiseDBSync = function() {
