@@ -16,7 +16,6 @@ import {
   Button,
   Form,
   Header,
-  Icon,
   Item,
   Label,
   Left,
@@ -25,7 +24,9 @@ import {
   Title,
 } from 'native-base';
 
+import { Appearance } from 'react-native-appearance';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Modal from 'react-native-modalbox';
 import Swipeout from 'react-native-swipeout';
 import Swiper from 'react-native-swiper';
@@ -40,6 +41,7 @@ export default class HomeScreen extends Component {
     this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
+    this.scheme = Appearance.getColorScheme();
   }
 
   componentDidMount() {
@@ -306,7 +308,6 @@ export default class HomeScreen extends Component {
 
   render() {
     const itemList = this.state.list;
-    var totalCost = 0;
     var totalWeeklyCost = 0;
     var totalMonthlyCost = 0;
     var totalYearlyCost = 0;
@@ -358,7 +359,7 @@ export default class HomeScreen extends Component {
     }
 
     return (
-      <View style={{flex: 1}}>
+      <View style={this.scheme==='dark' ? {backgroundColor: 'rgb(65,65,65)', flex: 1} : {flex: 1} }>
         {/*Header*/}
         <Header style={styles.header} transparent>
           <Body>
@@ -387,9 +388,9 @@ export default class HomeScreen extends Component {
         <Modal style={styles.modal} position={'bottom'} ref={'addModal'}>
           {/* Header */}
           <View style={{flex: 0.2, flexDirection: "row"}}>
-            <Icon style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} type="Entypo" name="cross" onPress={() => this.refs.addModal.close()}></Icon>
+            <Icon style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} name="close" size={32} onPress={() => this.refs.addModal.close()}></Icon>
             <View style={{flex: 0.8}} >
-              <Icon style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}} type="Entypo" name="chevron-down"></Icon>
+              <Icon style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}} name="chevron-down" size={32}></Icon>
             </View>
             <TouchableOpacity style={[styles.button, {flex: 0.1, marginRight: '1%'}]} onPress={this._onPressAdd} >
               <Text style={{color: 'white', fontSize: 18, textAlign: 'center', marginTop: 15}}>追加</Text>
@@ -408,7 +409,7 @@ export default class HomeScreen extends Component {
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
               <Item >
-                <Label><Icon type="MaterialCommunityIcons" name="wallet"></Icon></Label>
+                <Label><Icon name="wallet" size={32}></Icon></Label>
                 <TextInput type="number"
                        keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
                        name={"price"}
@@ -419,7 +420,7 @@ export default class HomeScreen extends Component {
               </Item>
 
               <Item Picker>
-                <Label><Icon type="Entypo" name="cycle"></Icon></Label>
+                <Label><Icon name="cached" size={32}></Icon></Label>
                 <Picker mdoe={'dropdown'} prompt={'支払いサイクル'} placeholder={'支払いサイクル'} selectedValue={this.state.cycle} onValueChange={(value) => {this.setState({cycle: value})}}>
                   <Picker.Item label={'毎週'} value={'週'} />
                   <Picker.Item label={'毎月'} value={'月'} />
@@ -429,23 +430,26 @@ export default class HomeScreen extends Component {
 
               <View>
                 <Item >
-                  <Label><Icon type="MaterialCommunityIcons" name="calendar"></Icon></Label>
-                  <Button transparent onPress={() => {this.setState({isVisible: true})}}>
-                      <Text style={{fontSize: 18 }} >
-                        {this.formatDate()}
-                      </Text>
-                  </Button>
-                  <DateTimePickerModal
-                      cancelTextIOS={"キャンセル"}
-                      confirmTextIOS={"OK"}
-                      headerTextIOS={"日付を選択"}
-                      isVisible={this.state.isVisible}
-                      isDarkModeEnabled={false}
-                      mode="date"
-                      onConfirm={this.handleConfirm}
-                      onCancel={() => {this.setState({isVisible: false})}}
-                      locale="ja"
-                  />
+                  <Label><Icon name="calendar" size={32}></Icon></Label>
+                  <View style={{flexDirection:'column', marginTop:5, marginLeft:10}}>
+                    <Text>次のお支払日</Text>
+                    <Button transparent onPress={() => {this.setState({isVisible: true})}}>
+                        <Text style={{fontSize: 18 }} >
+                          {this.formatDate()}
+                        </Text>
+                    </Button>
+                    <DateTimePickerModal
+                        cancelTextIOS={"キャンセル"}
+                        confirmTextIOS={"OK"}
+                        headerTextIOS={"日付を選択"}
+                        isVisible={this.state.isVisible}
+                        isDarkModeEnabled={true}
+                        mode="date"
+                        onConfirm={this.handleConfirm}
+                        onCancel={() => {this.setState({isVisible: false})}}
+                        locale="ja"
+                    />
+                  </View>
                 </Item>
               </View>
             </Form>
@@ -453,11 +457,11 @@ export default class HomeScreen extends Component {
         </Modal>
 
         {/*Modal Sammon Button*/}
-        <View style={{top: '85%', left: '70%', position: 'absolute', }}>
+        <View style={{top: '85%', right: '5%', position: 'absolute'}}>
           <TouchableOpacity
             style={styles.circleButton}
             onPress={() => this.refs.addModal.open()}>
-            <Text style={{fontSize: 48, color: 'white'}}>+</Text>
+            <Icon name='plus' size={36} color={'white'} style={{top: 10}}></Icon>
           </TouchableOpacity>
         </View>
       </View>
@@ -602,19 +606,14 @@ const styles = StyleSheet.create({
   },
   circleButton: {
     backgroundColor: 'rgb(93, 43, 136)',
-    //marginLeft: 5,
-    //marginBottom: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    //paddingTop: 10,
-    //paddingBottom: 10,
-    height: 70,
-    width: 70,
+    height: 56,
+    width: 56,
     borderRadius: 120,
-    left: '80%',
   },
 
   modal: {
+    backgroundColor: 'rgb(65, 65, 65)',
     height: 720,
     borderTopStartRadius: 10,
   },
