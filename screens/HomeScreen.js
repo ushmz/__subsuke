@@ -43,6 +43,12 @@ export default class HomeScreen extends Component {
   }
 
   componentDidMount() {
+    /**
+     * コンポーネントがマウントされたときに呼び出される．初期化として以下の3点を行う．
+     *   - データベースへの接続，(なければ作成)
+     *   - データベースの内容をアイテムリスト(State)に反映
+     *   - プッシュトークンの登録．(TODO:アプリ起動時に移動)
+     */
     let itemList = {};
     console.log('start DBSync...');
     var proomiseDBSync = function() {
@@ -149,7 +155,13 @@ export default class HomeScreen extends Component {
   }
 
   _onPressAdd = () => {
-    let rowid;
+    /**
+     * リストへのアイテム追加時に呼び出される関数
+     * 入力フォームの内容をデータベースに登録，通知サーバーに登録
+     * 追加した内容でStateを更新，入力フォームの内容をリセット
+     */
+
+     let rowid;
     let items = {};
 
     const additional = {
@@ -228,6 +240,12 @@ export default class HomeScreen extends Component {
   }
 
   _onDelete = (rowid) => {
+    /**
+     * アプリでのリスト上のリストのアイテムの削除時に呼び出される関数．
+     * データベースから削除，通知サーバーから削除
+     * 削除された内容でStateを更新，入力フォームの内容をリセット
+     */
+
     let items = {};
     const connection = SQLite.openDatabase('subsuke');
     connection.transaction(
@@ -277,12 +295,20 @@ export default class HomeScreen extends Component {
   } 
 
   setValue = (stateName, value) => {
+    /**
+     * フォームの内容の変更時に呼び出される．
+     * 第1引数の名前のstateの値を第2引数の値で更新する．
+     */
     this.setState({[stateName]: value});
   };
 
   handleDuedate = (input) => {
-    // execute in _onPressAdd()
-    // this use the value of state[cycle]
+    /**
+     * execute in _onPressAdd()
+     * this use the value of state[cycle]
+     * 
+     * 必要ない可能性があるので要検討
+     */
     let duedate = '';
     if (this.state.cycle === '週') {
       duedate = input.getDay();
@@ -301,10 +327,16 @@ export default class HomeScreen extends Component {
   };
 
   formatDate = () => {
-      return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + this.state.due.getDate() + "日"
+    /**
+     * State(due)のデータオブジェクトを日本語表記にフォーマットする．
+     */
+    return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + this.state.due.getDate() + "日"
   }
 
   render() {
+    /**
+     * レンダー関数
+     */
     const itemList = this.state.list;
     var totalCost = 0;
     var totalWeeklyCost = 0;
