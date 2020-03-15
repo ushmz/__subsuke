@@ -354,7 +354,7 @@ export default class HomeScreen extends Component {
           />
         )
       } else {
-        return <Text style={{textAlign: 'center'}}>登録済みのサービスはありません</Text>            
+        return <Text style={{textAlign: 'center'}, styles.txtScheme}>登録済みのサービスはありません</Text>            
       }
     }
 
@@ -363,7 +363,7 @@ export default class HomeScreen extends Component {
         {/*Header*/}
         <Header style={{backgroundColor: this.scheme==='dark'?'rgb(188, 135, 255)':'rgb(98,0,238)'}} transparent>
           <Body>
-            <Title style={{marginLeft: '5%'}}>Subsuke</Title>
+            <Title style={styles.txtScheme}>Subsuke</Title>
           </Body>
         </Header>
 
@@ -646,7 +646,7 @@ const styles = StyleSheet.create({
   },
 
   modal: {
-    backgroundColor: 'rgb(65, 65, 65)',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65,65,65)' : '#fff',
     height: 720,
     borderTopStartRadius: 10,
   },
