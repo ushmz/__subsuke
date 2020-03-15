@@ -4,6 +4,7 @@ import * as Font from 'expo-font';
 import React, { useState } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Appearance, AppearanceProvider } from 'react-native-appearance';
 
 import AppNavigator from './navigation/AppNavigator';
 
@@ -12,18 +13,26 @@ export default function App(props) {
 
   if (!isLoadingComplete && !props.skipLoadingScreen) {
     return (
-      <AppLoading
-        startAsync={loadResourcesAsync}
-        onError={handleLoadingError}
-        onFinish={() => handleFinishLoading(setLoadingComplete)}
-      />
+      <AppearanceProvider>
+        <AppLoading
+          startAsync={loadResourcesAsync}
+          onError={handleLoadingError}
+          onFinish={() => handleFinishLoading(setLoadingComplete)}
+        />
+      </AppearanceProvider>
     );
   } else {
+    let barStyle = Appearance.getColorScheme() === 'dark' ? 'light-content' : 'dark-content';
+    let barColor = Appearance.getColorScheme() === 'dark' ? 'rgb(188, 135, 255)':'rgb(98,0,238)';
     return (
-      <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        <AppNavigator />
-      </View>
+      <AppearanceProvider>
+        <View style={styles.container}>
+          {/*
+            *{Platform.OS === 'ios' && <StatusBar barStyle={barStyle} backgroundColor={barColor}/>}
+            */}
+          <AppNavigator />
+        </View>
+      </AppearanceProvider>
     );
   }
 }
@@ -61,6 +70,6 @@ function handleFinishLoading(setLoadingComplete) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff',
   },
 });
