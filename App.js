@@ -23,10 +23,13 @@ export default function App(props) {
     );
   } else {
     let barStyle = Appearance.getColorScheme() === 'dark' ? 'light-content' : 'dark-content';
+    let barColor = Appearance.getColorScheme() === 'dark' ? 'rgb(188, 135, 255)':'rgb(98,0,238)';
     return (
       <AppearanceProvider>
         <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle={barStyle} />}
+          {/*
+            *{Platform.OS === 'ios' && <StatusBar barStyle={barStyle} backgroundColor={barColor}/>}
+            */}
           <AppNavigator />
         </View>
       </AppearanceProvider>

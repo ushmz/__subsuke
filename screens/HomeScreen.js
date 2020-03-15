@@ -327,7 +327,7 @@ export default class HomeScreen extends Component {
             totalMonthlyCost += parseInt(current.price)/12;
             totalYearlyCost += parseInt(current.price);
           }
-          totalCost += parseInt(current.price);
+          //totalCost += parseInt(current.price);
         });
     }
 
@@ -370,13 +370,13 @@ export default class HomeScreen extends Component {
           <View style={styles.welcomeContainer}>
             <Swiper style={styles.wrapper} showsButtons={true}>
               <View style={styles.slide}>
-                <Text>{'週あたり  ¥' + totalWeeklyCost}</Text>
+                <Text style={styles.txtScheme}>{'週あたり  ¥' + totalWeeklyCost}</Text>
               </View>
               <View style={styles.slide}>
-                <Text>{'月あたり  ¥' + totalMonthlyCost}</Text>
+                <Text style={styles.txtScheme}>{'月あたり  ¥' + totalMonthlyCost}</Text>
               </View>
               <View style={styles.slide}>
-                <Text>{'年あたり  ¥' + totalYearlyCost}</Text>
+                <Text style={styles.txtScheme}>{'年あたり  ¥' + totalYearlyCost}</Text>
               </View>
             </Swiper>
 
@@ -432,17 +432,17 @@ export default class HomeScreen extends Component {
               <Item Picker>
                 <Label><Icon name="cached" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
                 <Picker 
-                  itemStyle={{backgroundColor: this.scheme==='dark'?'rgb(65,65,65)':'#fff'}}
+                  itemStyle={styles.bgScheme}
                   iosHeader={'支払いサイクル'}
                   headerStyle={{backgroundColor: this.scheme==='dark'?'#000':'#fff'}}
-                  headerTitleStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
+                  headerTitleStyle={styles.txtScheme}
                   headerBackButtonText={'戻る'}
                   //headerBackButtonTextStyle={}
-                  modalStyle={{backgroundColor: this.scheme==='dark'?'rgb(65,65,65)':'#fff'}}
+                  modalStyle={styles.bgScheme}
                   mdoe={'dropdown'}
                   prompt={'支払いサイクル'} 
                   placeholder={'支払いサイクル'}
-                  placeholderStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
+                  placeholderStyle={styles.txtScheme}
                   textStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
                   itemTextStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
                   selectedValue={this.state.cycle} 
@@ -457,9 +457,9 @@ export default class HomeScreen extends Component {
                 <Item >
                   <Label><Icon name="calendar" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
                   <View style={{flexDirection:'column', marginTop:5, marginLeft:10}}>
-                    <Text style={{color: this.scheme==='dark'?'#fff':'#000'}}>次のお支払日</Text>
+                    <Text style={styles.txtScheme}>次のお支払日</Text>
                     <Button transparent onPress={() => {this.setState({isVisible: true})}}>
-                        <Text style={{fontSize: 18, color: this.scheme==='dark'?'#fff':'#000'}} >
+                        <Text style={{fontSize: 18}, styles.txtScheme} >
                           {this.formatDate()}
                         </Text>
                     </Button>
@@ -622,10 +622,20 @@ const styles = StyleSheet.create({
   },
   
   // user settings
+  txtScheme: {
+    color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
+  },
+  bgScheme: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#ffffff',
+  },
+  uiScheme: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
+  },
   flatlist: {
     flex: 1.0,
-    backgroundColor: '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65,65,65)' : '#fff',
     borderTopWidth: 1,
+    borderTopColor: Appearance.getColorScheme() === 'dark' ? 'rgb(90, 90, 90)' : '#000',
   },
   circleButton: {
     backgroundColor: 'rgb(93, 43, 136)',

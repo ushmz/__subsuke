@@ -1,17 +1,17 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View} from 'react-native';
 import { ExpoLinksView } from '@expo/samples';
 import { Appearance } from 'react-native-appearance';
 
 export default function LinksScreen() {
-  return (
-    <ScrollView style={styles.container}>
-      {/**
-       * Go ahead and delete ExpoLinksView and replace it with your content;
-       * we just wanted to provide you with some helpful links.
-       */}
-      <ExpoLinksView />
-    </ScrollView>
+  return (     
+      <ScrollView style={styles.container}>
+        {/**
+         * Go ahead and delete ExpoLinksView and replace it with your content;
+         * we just wanted to provide you with some helpful links.
+         */}
+        <ExpoLinksView />
+      </ScrollView>
   );
 }
 
