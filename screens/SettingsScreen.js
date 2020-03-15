@@ -1,6 +1,7 @@
-import React from 'react';
+import React, {Component} from 'react';
 import {SectionList, StyleSheet, Text, View} from 'react-native';
 import { Appearance } from 'react-native-appearance';
+import { Header, Body, Title } from 'native-base';
 
 export default function SettingsScreen() {
   /**
@@ -8,14 +9,24 @@ export default function SettingsScreen() {
    * we just wanted to give you a quick view of your config.
    */
 
-  return <ConfigView />;
+  return (
+    <View style={{flex: 1}}>
+      <Header style={styles.header} transparent>
+        <Body>
+          <Text style={styles.txtScheme}>Settings</Text>
+        </Body>
+      </Header>
+      <ConfigView />
+    </View>
+  );
 }
 
 SettingsScreen.navigationOptions = {
   title: 'Setting',
 };
 
-class ConfigView extends React.Component {
+
+class ConfigView extends Component {
   render() {
 
     const sections = [
@@ -26,15 +37,15 @@ class ConfigView extends React.Component {
     ];
 
     return (
-      <SectionList
-        style={styles.container}
-        renderItem={this._renderItem}
-        renderSectionHeader={this._renderSectionHeader}
-        stickySectionHeadersEnabled={true}
-        keyExtractor={(item, index) => index}
-        //ListHeaderComponent={ListHeader}
-        sections={sections}
-      />
+          <SectionList
+            style={styles.container}
+            renderItem={this._renderItem}
+            renderSectionHeader={this._renderSectionHeader}
+            stickySectionHeadersEnabled={true}
+            keyExtractor={(item, index) => index}
+            //ListHeaderComponent={ListHeader}
+            sections={sections}
+          />
     );
   }
 
@@ -48,7 +59,7 @@ class ConfigView extends React.Component {
     } else {
       return (
         <SectionContent>
-          <Text style={styles.sectionContentText}>{item.value}</Text>
+          <Text style={[styles.sectionContentText, styles.txtScheme]}>{item.value}</Text>
         </SectionContent>
       );
     }
@@ -141,4 +152,16 @@ const styles = StyleSheet.create({
   colorTextContainer: {
     flex: 1,
   },
+  txtScheme: {
+    color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
+  },
+  bgScheme: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#ffffff',
+  },
+  uiScheme: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
+  },
+  header: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(188, 135, 255)' : 'rgb(98,0,238)',
+  }
 });
