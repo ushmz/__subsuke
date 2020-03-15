@@ -9,13 +9,13 @@
       "android",
       "web"
     ],
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/images/subsuke.png",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#4e1a77"
     },
     "updates": {
       "enabled": true,
@@ -26,13 +26,20 @@
     ],
     "android": {
       "package": "com.subsuke.subsuke",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "permissions": [],
+      "versionCode": 1
     },
     "ios": {
       "bundleIdentifier": "com.subsuke.subsuke",
       "supportsTablet": true
     },
     "description": "",
-    "githubUrl": "https://github.com/rabhareit/Subsuke"
+    "githubUrl": "https://github.com/rabhareit/Subsuke",
+    "notification": {
+      "icon": "./assets/images/notification_hdpi.png",
+      "iosDisplayInForeground": true,
+      "androidMode": "default"
+    }
   }
 }
