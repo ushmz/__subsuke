@@ -6,7 +6,7 @@
     "sdkVersion": "36.0.0",
     "platforms": [
       "ios",
-      "android",
+      "android"
     ],
     "version": "1.0.4",
     "orientation": "portrait",
@@ -15,7 +15,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#4e1a77"
+      "backgroundColor": "rgb(78, 26, 119)"
     },
     "updates": {
       "enabled": true,
@@ -28,7 +28,7 @@
       "package": "com.subsuke.subsuke",
       "googleServicesFile": "./google-services.json",
       "permissions": [],
-      "versionCode": 1
+      "versionCode": 2
     },
     "ios": {
       "bundleIdentifier": "com.subsuke.subsuke",

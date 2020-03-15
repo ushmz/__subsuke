@@ -392,8 +392,8 @@ export default class HomeScreen extends Component {
 
     return (
       <View style={this.scheme==='dark' ? {backgroundColor: 'rgb(65,65,65)', flex: 1} : {flex: 1} }>
-        {/*Header*/}
-        <Header style={{backgroundColor: this.scheme==='dark'?'rgb(188, 135, 255)':'rgb(98,0,238)'}} transparent>
+        {/*Header 181 124 252 or 98 0 238*/}
+        <Header style={{backgroundColor: this.scheme==='dark'?'rgb(188, 135, 255)':'rgb(181, 124, 252)'}} transparent>
           <Body>
             <Title style={styles.txtScheme}>Subsuke</Title>
           </Body>
@@ -445,7 +445,7 @@ export default class HomeScreen extends Component {
                 <TextInput type="text"
                        name={"service"}
                        style={{fontSize: 36}}
-                       placeholder={"サブスク名を追加"}
+                       placeholder={"サブスクを追加"}
                        value={this.state.service}
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
@@ -500,7 +500,7 @@ export default class HomeScreen extends Component {
                         confirmTextIOS={"OK"}
                         headerTextIOS={"日付を選択"}
                         isVisible={this.state.isVisible}
-                        isDarkModeEnabled={true}
+                        isDarkModeEnabled={this.scheme==='dark'}
                         mode="date"
                         minimumDate={this.state.due}
                         onConfirm={this.handleConfirm}

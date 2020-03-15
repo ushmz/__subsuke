@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
   },
   header: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(188, 135, 255)' : 'rgb(98,0,238)',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(188, 135, 255)' : 'rgb(181, 124, 252)',
   },
   titleText: {
     fontSize: 16,
