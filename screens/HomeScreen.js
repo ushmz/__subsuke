@@ -386,32 +386,37 @@ export default class HomeScreen extends Component {
           />
         )
       } else {
-        return <Text style={{textAlign: 'center'}, styles.txtScheme}>登録済みのサービスはありません</Text>            
+        /**
+         * Would like to insert image...
+         */
+        return <Text style={[{textAlign: 'center', fontSize: 18, marginTop: 10}, styles.txtScheme]}>登録済みのサービスはありません</Text>            
       }
     }
 
     return (
-      <View style={this.scheme==='dark' ? {backgroundColor: 'rgb(65,65,65)', flex: 1} : {flex: 1} }>
+      <View style={this.scheme==='dark' ? {backgroundColor: 'rgb(20, 5, 30)', flex: 1} : {flex: 1} }>
         {/*Header 181 124 252 or 98 0 238*/}
-        <Header style={{backgroundColor: this.scheme==='dark'?'rgb(188, 135, 255)':'rgb(181, 124, 252)'}} transparent>
+        <Header style={{backgroundColor: this.scheme==='dark'?'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'}} transparent={true} iosBarStyle={this.scheme==='dark'?'#fff':'#000'}>
+          <Left />
           <Body>
-            <Title style={styles.txtScheme}>Subsuke</Title>
+            <Title style={[styles.txtScheme]}>Subsuke</Title>
           </Body>
+          <Right />
+          
         </Header>
 
           <View style={styles.welcomeContainer}>
-            <Swiper style={styles.wrapper} showsButtons={true}>
+            <Swiper style={styles.wrapper} containerStyle={{backgroundColor: 'rgb(10, 2, 15)'}} index={1} showsButtons={true}>
               <View style={styles.slide}>
-                <Text style={styles.txtScheme}>{'週あたり  ¥' + totalWeeklyCost}</Text>
+                <Text style={[styles.txtScheme, styles.totalCost]}>{'週あたり  ¥' + totalWeeklyCost}</Text>
               </View>
               <View style={styles.slide}>
-                <Text style={styles.txtScheme}>{'月あたり  ¥' + totalMonthlyCost}</Text>
+                <Text style={[styles.txtScheme, styles.totalCost]}>{'月あたり  ¥' + totalMonthlyCost}</Text>
               </View>
               <View style={styles.slide}>
-                <Text style={styles.txtScheme}>{'年あたり  ¥' + totalYearlyCost}</Text>
+                <Text style={[styles.txtScheme, styles.totalCost]}>{'年あたり  ¥' + totalYearlyCost}</Text>
               </View>
             </Swiper>
-
           </View>
 
         <UserFlatlist />
@@ -701,6 +706,10 @@ const styles = StyleSheet.create({
     width: '10%',
     //alignItems: 'flex-end',
   },
+  slide: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   textInput: {
     borderRadius: 10,
     borderColor: 'black',
@@ -710,9 +719,11 @@ const styles = StyleSheet.create({
     marginVertical: '10%',
     textAlign: 'center',
   },
-  wrapper:{},
-  slide: {
-    justifyContent: 'center',
-    alignItems: 'center',
+  totalCost: {
+    fontSize: 32,
+    marginTop: 10,
+  },
+  wrapper: {
+    
   },
 });

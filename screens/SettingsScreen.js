@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {SectionList, StyleSheet, Text, View} from 'react-native';
 import { Appearance } from 'react-native-appearance';
-import { Header, Body, Title } from 'native-base';
+import { Header, Body, Left, Right, Title } from 'native-base';
 
 export default function SettingsScreen() {
   /**
@@ -11,10 +11,12 @@ export default function SettingsScreen() {
 
   return (
     <View style={{flex: 1}}>
-      <Header style={styles.header} transparent>
+      <Header style={styles.header} transparent={true} iosBarStyle={Appearance.getColorScheme()==='dark'?'#fff':'#000'}>
+        <Left />
         <Body>
-          <Text style={styles.txtScheme}>Settings</Text>
+          <Title style={[styles.txtScheme]}>Settings</Title>
         </Body>
+        <Right />          
       </Header>
       <ConfigView />
     </View>
@@ -156,12 +158,12 @@ const styles = StyleSheet.create({
     color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#ffffff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(30, 20, 40)' : '#ffffff',
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
   },
   header: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(188, 135, 255)' : 'rgb(181, 124, 252)',
-  }
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(191, 90, 242)' : 'rgb(175, 82, 222)'
+  },
 });

@@ -1,7 +1,7 @@
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import { ScrollView, StyleSheet, View} from 'react-native';
-import { Body, Header, Text } from 'native-base';
+import { Body, Header, Left, Right,Text, Title } from 'native-base';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Touchable from 'react-native-platform-touchable';
 import { Appearance } from 'react-native-appearance';
@@ -9,10 +9,12 @@ import { Appearance } from 'react-native-appearance';
 export default function LinksScreen() {
   return (    
     <View style={{flex: 1}}> 
-      <Header style={styles.header} transparent>
+      <Header style={styles.header} transparent={true} iosBarStyle={Appearance.getColorScheme()==='dark'?'#fff':'#000'}>
+        <Left />
         <Body>
-          <Text style={styles.txtScheme}>Links</Text>
+          <Title style={[styles.txtScheme]}>Links</Title>
         </Body>
+        <Right />          
       </Header>
       <ScrollView style={styles.container}>
         <LinksView iconName={'emoticon-wink-outline'} title={'Sorry! I\'m coding. Coming soon!'} link={'hoge'}/>
@@ -72,7 +74,7 @@ const styles = StyleSheet.create({
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
   },
   header: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(188, 135, 255)' : 'rgb(181, 124, 252)',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(191, 90, 242)' : 'rgb(175, 82, 222)'
   },
   titleText: {
     fontSize: 16,
