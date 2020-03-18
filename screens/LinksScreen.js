@@ -16,7 +16,7 @@ export default function LinksScreen() {
         </Body>
         <Right />          
       </Header>
-      <ScrollView style={styles.container}>
+      <ScrollView style={[styles.container, styles.bgScheme]}>
         <LinksView iconName={'emoticon-wink-outline'} title={'Sorry! I\'m coding. Coming soon!'} link={'hoge'}/>
       </ScrollView>
     </View>
@@ -62,19 +62,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 15,
-    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(65,65,65)':'#fff',
   },
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
+    color: Appearance.getColorScheme() === 'dark' ? 'rgb(200, 200, 200)' : '#000',
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#ffffff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
   },
   header: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(191, 90, 242)' : 'rgb(175, 82, 222)'
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'
   },
   titleText: {
     fontSize: 16,
@@ -84,7 +83,7 @@ const styles = StyleSheet.create({
     //position: 'absolute'  TODO
   },
   link: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderBottomWidth: StyleSheet.hairlineWidth,

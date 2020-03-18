@@ -35,6 +35,30 @@ import registerForPushNotificationsAsync from '../components/NotificationRegiste
 import SubsucItem from '../components/SubscItem';
 
 export default class HomeScreen extends Component {
+
+  /**
+   * light mode :
+   *     text color : rgb(0, 0, 0)
+   *     header : rgb(175, 82, 222)
+   *     light : rgb(250, 250, 250)
+   *     lighter : rgb(240,240,240)
+   *     yetlighter : rgb(230,230,230)
+   * 
+   * dark mode :
+   *     text color : rgb()
+   *     header color : rgb(80, 20, 120)
+   *     dark :  rgb(75, 75, 75)
+   *     darker : rgb(65, 65, 65)
+   *     yetDarker : rgb(35, 35, 35)    -> yo!check!
+   * 
+   * subsuke theme :
+   *     text color : rgb(200, 200, 200)
+   *     header color : rgb(80, 20, 120)
+   *     dark :rgb(40, 10, 60)
+   *     darker : rgb(20, 5, 30)
+   *     yetDarker : rgb(10, 2, 15)
+   * 
+   */
   
   constructor(props) {
     super(props);
@@ -394,7 +418,7 @@ export default class HomeScreen extends Component {
     }
 
     return (
-      <View style={this.scheme==='dark' ? {backgroundColor: 'rgb(20, 5, 30)', flex: 1} : {flex: 1} }>
+      <View style={[styles.bgScheme, {flex: 1}]}>
         {/*Header 181 124 252 or 98 0 238*/}
         <Header style={{backgroundColor: this.scheme==='dark'?'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'}} transparent={true} iosBarStyle={this.scheme==='dark'?'#fff':'#000'}>
           <Left />
@@ -405,19 +429,19 @@ export default class HomeScreen extends Component {
           
         </Header>
 
-          <View style={styles.welcomeContainer}>
-            <Swiper style={styles.wrapper} containerStyle={{backgroundColor: 'rgb(10, 2, 15)'}} index={1} showsButtons={true}>
-              <View style={styles.slide}>
-                <Text style={[styles.txtScheme, styles.totalCost]}>{'週あたり  ¥' + totalWeeklyCost}</Text>
-              </View>
-              <View style={styles.slide}>
-                <Text style={[styles.txtScheme, styles.totalCost]}>{'月あたり  ¥' + totalMonthlyCost}</Text>
-              </View>
-              <View style={styles.slide}>
-                <Text style={[styles.txtScheme, styles.totalCost]}>{'年あたり  ¥' + totalYearlyCost}</Text>
-              </View>
-            </Swiper>
-          </View>
+        <View style={{height: '20%'}}>
+          <Swiper containerStyle={styles.swiper} index={1} showsButtons={true} dotColor={Appearance.getColorScheme() === 'dark' ? 'rgba(255,255,255,.2)' : 'rgba(0,0,0,.2)'}>
+            <View style={styles.slide}>
+              <Text style={[styles.txtScheme, styles.totalCost]}>{'週あたり  ¥' + totalWeeklyCost}</Text>
+            </View>
+            <View style={styles.slide}>
+              <Text style={[styles.txtScheme, styles.totalCost]}>{'月あたり  ¥' + totalMonthlyCost}</Text>
+            </View>
+            <View style={styles.slide}>
+              <Text style={[styles.txtScheme, styles.totalCost]}>{'年あたり  ¥' + totalYearlyCost}</Text>
+            </View>
+          </Swiper>
+        </View>
 
         <UserFlatlist />
         
@@ -455,7 +479,7 @@ export default class HomeScreen extends Component {
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
               <Item >
-                <Label><Icon name="wallet" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
+                <Label><Icon name="wallet" size={32} color={this.scheme==='dark'?'rgb(200, 200, 200)':'#000'}></Icon></Label>
                 <TextInput type="number"
                        keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
                        name={"price"}
@@ -467,7 +491,7 @@ export default class HomeScreen extends Component {
               </Item>
 
               <Item Picker>
-                <Label><Icon name="cached" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
+                <Label><Icon name="cached" size={32} color={this.scheme==='dark'?'rgb(200, 200, 200)':'#000'}></Icon></Label>
                 <Picker 
                   itemStyle={styles.bgScheme}
                   iosHeader={'支払いサイクル'}
@@ -492,7 +516,7 @@ export default class HomeScreen extends Component {
 
               <View>
                 <Item >
-                  <Label><Icon name="calendar" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
+                  <Label><Icon name="calendar" size={32} color={this.scheme==='dark'?'rgb(200, 200, 200)':'#000'}></Icon></Label>
                   <View style={{flexDirection:'column', marginTop:5, marginLeft:10}}>
                     <Text style={styles.txtScheme}>次のお支払日</Text>
                     <Button transparent onPress={() => {this.setState({isVisible: true})}}>
@@ -585,9 +609,8 @@ const styles = StyleSheet.create({
   welcomeContainer: {
     //flex: 0.2,
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-    height: '20%',
+    //marginTop: 10,
+    //marginBottom: 20,
   },
   welcomeImage: {
     width: 100,
@@ -660,17 +683,17 @@ const styles = StyleSheet.create({
   
   // user settings
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
+    color: Appearance.getColorScheme() === 'dark' ? 'rgb(200, 200, 200)' : '#000',
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#ffffff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
   },
   flatlist: {
     flex: 1.0,
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65,65,65)' : '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#fff',
     borderTopWidth: 1,
     borderTopColor: Appearance.getColorScheme() === 'dark' ? 'rgb(90, 90, 90)' : '#000',
   },
@@ -681,10 +704,9 @@ const styles = StyleSheet.create({
     width: 56,
     borderRadius: 120,
   },
-
   modal: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65,65,65)' : '#fff',
-    height: 720,
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
+    height: '80%',
     borderTopStartRadius: 10,
   },
   button: {
@@ -710,6 +732,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  swiper: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(10, 2, 15)' : 'rgb(232,232,232)'
+  },
   textInput: {
     borderRadius: 10,
     borderColor: 'black',
@@ -721,9 +746,8 @@ const styles = StyleSheet.create({
   },
   totalCost: {
     fontSize: 32,
-    marginTop: 10,
+    marginTop: 30,
   },
   wrapper: {
-    
   },
 });

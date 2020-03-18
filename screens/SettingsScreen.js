@@ -40,7 +40,7 @@ class ConfigView extends Component {
 
     return (
           <SectionList
-            style={styles.container}
+            style={[styles.container, styles.bgScheme]}
             renderItem={this._renderItem}
             renderSectionHeader={this._renderSectionHeader}
             stickySectionHeadersEnabled={true}
@@ -66,7 +66,6 @@ class ConfigView extends Component {
       );
     }
   };
-
 };
 
 const SectionHeader = ({ title }) => {
@@ -107,7 +106,6 @@ const Color = ({ value }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(65,65,65)':'#fff',
   },
   titleContainer: {
     paddingHorizontal: 15,
@@ -120,7 +118,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   sectionHeaderContainer: {
-    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(45,45,45)':'#fbfbfb',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(10, 2, 15)' : '#fbfbfb',
     paddingVertical: 8,
     paddingHorizontal: 15,
     //borderWidth: StyleSheet.hairlineWidth,
@@ -155,15 +153,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
+    color: Appearance.getColorScheme() === 'dark' ? 'rgb(200, 200, 200)' : '#000',
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(30, 20, 40)' : '#ffffff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
   },
   header: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(191, 90, 242)' : 'rgb(175, 82, 222)'
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'
   },
 });

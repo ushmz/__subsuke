@@ -79,7 +79,7 @@ const tabNavigator = createBottomTabNavigator(
   },
   {
     tabBarOptions: {
-      style: {backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(40, 10, 60)':'#fff'}
+      style: {backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(40, 10, 60)':'rgb(250, 250, 250)'}
     },
   },
   );
