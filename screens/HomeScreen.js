@@ -38,14 +38,14 @@ export default class HomeScreen extends Component {
 
   /**
    * light mode :
-   *     text color : rgb(0, 0, 0)
+   *     text color : rgb(10, 10, 10)    -> yo!check!
    *     header : rgb(175, 82, 222)
    *     light : rgb(250, 250, 250)
    *     lighter : rgb(240,240,240)
    *     yetlighter : rgb(230,230,230)
    * 
    * dark mode :
-   *     text color : rgb()
+   *     text color : rgb(200, 200, 200)
    *     header color : rgb(80, 20, 120)
    *     dark :  rgb(75, 75, 75)
    *     darker : rgb(65, 65, 65)
