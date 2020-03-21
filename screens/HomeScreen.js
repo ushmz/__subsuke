@@ -30,9 +30,11 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Modal from 'react-native-modalbox';
 import Swipeout from 'react-native-swipeout';
 import Swiper from 'react-native-swiper';
+import * as SecureStore from 'expo-secure-store';
 
 import registerForPushNotificationsAsync from '../components/NotificationRegister'
 import SubsucItem from '../components/SubscItem';
+import COLORS from '../global/Color';
 
 export default class HomeScreen extends Component {
 
@@ -65,7 +67,7 @@ export default class HomeScreen extends Component {
     this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
-    this.scheme = Appearance.getColorScheme();
+    this.theme = 'LIGHT';
   }
 
   componentDidMount() {
@@ -76,6 +78,7 @@ export default class HomeScreen extends Component {
      *   - プッシュトークンの登録．(TODO:アプリ起動時に移動)
      */
     let itemList = {};
+    console.log('/*--------------------------*/')
     console.log('start DBSync...');
     var proomiseDBSync = function() {
       return new Promise((resolve, reject) => {        
@@ -187,7 +190,7 @@ export default class HomeScreen extends Component {
      * 追加した内容でStateを更新，入力フォームの内容をリセット
      */
 
-     let rowid;
+    let rowid;
     let items = {};
 
     const additional = {
@@ -423,7 +426,7 @@ export default class HomeScreen extends Component {
         <Header style={{backgroundColor: this.scheme==='dark'?'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'}} transparent={true} iosBarStyle={this.scheme==='dark'?'#fff':'#000'}>
           <Left />
           <Body>
-            <Title style={[styles.txtScheme]}>Subsuke</Title>
+            <Title style={{color: COLORS[this.theme].TEXT}}>Subsuke</Title>
           </Body>
           <Right />
           
@@ -446,7 +449,7 @@ export default class HomeScreen extends Component {
         <UserFlatlist />
         
         {/*Modal Contents*/}
-        <Modal style={styles.modal} position={'bottom'} ref={'addModal'}>
+        <Modal style={styles.modal} position={'bottom'}  ref={'addModal'}>
           {/* Header */}
           <View style={{flex: 0.2, flexDirection: "row"}}>
             <Icon 
@@ -496,7 +499,7 @@ export default class HomeScreen extends Component {
                   itemStyle={styles.bgScheme}
                   iosHeader={'支払いサイクル'}
                   headerStyle={{backgroundColor: this.scheme==='dark'?'#000':'#fff'}}
-                  headerTitleStyle={styles.txtScheme}
+                  headerTitleStyle={{color: COLORS.SUBSUKE.TEXT}}
                   headerBackButtonText={'戻る'}
                   //headerBackButtonTextStyle={}
                   modalStyle={styles.bgScheme}
@@ -683,10 +686,11 @@ const styles = StyleSheet.create({
   
   // user settings
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark' ? 'rgb(200, 200, 200)' : '#000',
+    color: COLORS['DARK'].TEXT,
+    //color: Appearance.getColorScheme() === 'dark' ? 'rgb(200, 200, 200)' : '#000',
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.DARKER : 'rgb(242,242,242)',
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
@@ -706,7 +710,7 @@ const styles = StyleSheet.create({
   },
   modal: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
-    height: '80%',
+    height: '75%',
     borderTopStartRadius: 10,
   },
   button: {
@@ -734,6 +738,9 @@ const styles = StyleSheet.create({
   },
   swiper: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(10, 2, 15)' : 'rgb(232,232,232)'
+  },
+  _swiper: {
+    //backgroundColor: COLORS[DefaultPreference.get('theme')].YETDARKER,
   },
   textInput: {
     borderRadius: 10,

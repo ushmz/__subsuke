@@ -3,15 +3,16 @@ import {SectionList, StyleSheet, Text, View} from 'react-native';
 import { Appearance } from 'react-native-appearance';
 import { Header, Body, Left, Right, Title } from 'native-base';
 
+import COLORS from '../global/Color';
+
 export default function SettingsScreen() {
   /**
    * Go ahead and delete ExpoConfigView and replace it with your content;
    * we just wanted to give you a quick view of your config.
    */
-
   return (
     <View style={{flex: 1}}>
-      <Header style={styles.header} transparent={true} iosBarStyle={Appearance.getColorScheme()==='dark'?'#fff':'#000'}>
+      <Header style={[styles.header]} transparent={true} iosBarStyle={Appearance.getColorScheme()==='dark'?'#fff':'#000'}>
         <Left />
         <Body>
           <Title style={[styles.txtScheme]}>Settings</Title>
