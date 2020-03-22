@@ -16,7 +16,6 @@ import {
   Button,
   Form,
   Header,
-  Icon,
   Item,
   Label,
   Left,
@@ -26,7 +25,9 @@ import {
   Toast,
 } from 'native-base';
 
+import { Appearance } from 'react-native-appearance';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Modal from 'react-native-modalbox';
 import Swipeout from 'react-native-swipeout';
 import Swiper from 'react-native-swiper';
@@ -41,9 +42,16 @@ export default class HomeScreen extends Component {
     this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '週', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
+    this.scheme = Appearance.getColorScheme();
   }
 
   componentDidMount() {
+    /**
+     * コンポーネントがマウントされたときに呼び出される．初期化として以下の3点を行う．
+     *   - データベースへの接続，(なければ作成)
+     *   - データベースの内容をアイテムリスト(State)に反映
+     *   - プッシュトークンの登録．(TODO:アプリ起動時に移動)
+     */
     let itemList = {};
     console.log('start DBSync...');
     var proomiseDBSync = function() {
@@ -246,6 +254,12 @@ export default class HomeScreen extends Component {
   }
 
   _onDelete = (rowid) => {
+    /**
+     * アプリでのリスト上のリストのアイテムの削除時に呼び出される関数．
+     * データベースから削除，通知サーバーから削除
+     * 削除された内容でStateを更新，入力フォームの内容をリセット
+     */
+
     let items = {};
     const connection = SQLite.openDatabase('subsuke');
     connection.transaction(
@@ -279,23 +293,8 @@ export default class HomeScreen extends Component {
       () => {
         console.log('[_omDelete] Transaction success.');
         
-        fetch(this.PUSH_ENDPOINT+'/'+rowid, {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: {
-              value: this.state.token,
-            },
-            user: {
-              username: 'rabhareit',
-            },
-            notification: {
-              rowid: rowid,
-            },
-          }),
+        fetch(this.PUSH_ENDPOINT+'/'+rowid+':'+this.state.token, {
+          method: 'DELETE',
         });
 
         this.setState({
@@ -310,12 +309,20 @@ export default class HomeScreen extends Component {
   } 
 
   setValue = (stateName, value) => {
+    /**
+     * フォームの内容の変更時に呼び出される．
+     * 第1引数の名前のstateの値を第2引数の値で更新する．
+     */
     this.setState({[stateName]: value});
   };
 
   handleDuedate = (input) => {
-    // execute in _onPressAdd()
-    // this use the value of state[cycle]
+    /**
+     * execute in _onPressAdd()
+     * this use the value of state[cycle]
+     * 
+     * 必要ない可能性があるので要検討
+     */
     let duedate = '';
     if (this.state.cycle === '週') {
       duedate = input.getDay();
@@ -334,12 +341,17 @@ export default class HomeScreen extends Component {
   };
 
   formatDate = () => {
-      return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + this.state.due.getDate() + "日"
+    /**
+     * State(due)のデータオブジェクトを日本語表記にフォーマットする．
+     */
+    return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + this.state.due.getDate() + "日"
   }
 
   render() {
+    /**
+     * レンダー関数
+     */
     const itemList = this.state.list;
-    var totalCost = 0;
     var totalWeeklyCost = 0;
     var totalMonthlyCost = 0;
     var totalYearlyCost = 0;
@@ -359,7 +371,7 @@ export default class HomeScreen extends Component {
             totalMonthlyCost += parseInt(current.price)/12;
             totalYearlyCost += parseInt(current.price);
           }
-          totalCost += parseInt(current.price);
+          //totalCost += parseInt(current.price);
         });
     }
 
@@ -386,29 +398,29 @@ export default class HomeScreen extends Component {
           />
         )
       } else {
-        return <Text style={{textAlign: 'center'}}>登録済みのサービスはありません</Text>            
+        return <Text style={{textAlign: 'center'}, styles.txtScheme}>登録済みのサービスはありません</Text>            
       }
     }
 
     return (
-      <View style={{flex: 1}}>
-        {/*Header*/}
-        <Header style={styles.header} transparent>
+      <View style={this.scheme==='dark' ? {backgroundColor: 'rgb(65,65,65)', flex: 1} : {flex: 1} }>
+        {/*Header 181 124 252 or 98 0 238*/}
+        <Header style={{backgroundColor: this.scheme==='dark'?'rgb(188, 135, 255)':'rgb(181, 124, 252)'}} transparent>
           <Body>
-            <Title style={{marginLeft: '5%'}}>Subsuke</Title>
+            <Title style={styles.txtScheme}>Subsuke</Title>
           </Body>
         </Header>
 
           <View style={styles.welcomeContainer}>
             <Swiper style={styles.wrapper} showsButtons={true}>
               <View style={styles.slide}>
-                <Text>{'週あたり  ¥' + totalWeeklyCost}</Text>
+                <Text style={styles.txtScheme}>{'週あたり  ¥' + totalWeeklyCost}</Text>
               </View>
               <View style={styles.slide}>
-                <Text>{'月あたり  ¥' + totalMonthlyCost}</Text>
+                <Text style={styles.txtScheme}>{'月あたり  ¥' + totalMonthlyCost}</Text>
               </View>
               <View style={styles.slide}>
-                <Text>{'年あたり  ¥' + totalYearlyCost}</Text>
+                <Text style={styles.txtScheme}>{'年あたり  ¥' + totalYearlyCost}</Text>
               </View>
             </Swiper>
 
@@ -420,9 +432,18 @@ export default class HomeScreen extends Component {
         <Modal style={styles.modal} position={'bottom'} ref={'addModal'}>
           {/* Header */}
           <View style={{flex: 0.2, flexDirection: "row"}}>
-            <Icon style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} type="Entypo" name="cross" onPress={() => this.refs.addModal.close()}></Icon>
+            <Icon 
+              style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} 
+              name="close"
+              size={32}
+              color={this.scheme==='dark'?'#fff':'#000'}
+              onPress={() => this.refs.addModal.close()}></Icon>
             <View style={{flex: 0.8}} >
-              <Icon style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}} type="Entypo" name="chevron-down"></Icon>
+              <Icon
+                style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}}
+                name="chevron-down"
+                size={32}
+                color={this.scheme==='dark'?'#a0a0a0':'#000'}></Icon>
             </View>
             <TouchableOpacity style={[styles.button, {flex: 0.1, marginRight: '1%'}]} onPress={this._onPressAdd} >
               <Text style={{color: 'white', fontSize: 18, textAlign: 'center', marginTop: 15}}>追加</Text>
@@ -436,17 +457,18 @@ export default class HomeScreen extends Component {
                 <TextInput type="text"
                        name={"service"}
                        style={{fontSize: 36}}
-                       placeholder={"サブスク名を追加"}
+                       placeholder={"サブスクを追加"}
                        value={this.state.service}
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
               <Item >
-                <Label><Icon type="MaterialCommunityIcons" name="wallet"></Icon></Label>
+                <Label><Icon name="wallet" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
                 <TextInput type="number"
                        keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
                        name={"price"}
                        style={{fontSize: 24, margin: 10}}
                        placeholder={"金額を追加"}
+                       placeholderTextColor={this.scheme==='dark'?'#a0a0a0':'#000'}
                        value={this.state.price}
                        onChange={e => {this.setState({price: e.nativeEvent.text})}} />
               </Item>
@@ -477,23 +499,27 @@ export default class HomeScreen extends Component {
 
               <View>
                 <Item >
-                  <Label><Icon type="MaterialCommunityIcons" name="calendar"></Icon></Label>
-                  <Button transparent onPress={() => {this.setState({isVisible: true})}}>
-                      <Text style={{fontSize: 18 }} >
-                        {this.formatDate()}
-                      </Text>
-                  </Button>
-                  <DateTimePickerModal
-                      cancelTextIOS={"キャンセル"}
-                      confirmTextIOS={"OK"}
-                      headerTextIOS={"日付を選択"}
-                      isVisible={this.state.isVisible}
-                      isDarkModeEnabled={false}
-                      mode="date"
-                      onConfirm={this.handleConfirm}
-                      onCancel={() => {this.setState({isVisible: false})}}
-                      locale="ja"
-                  />
+                  <Label><Icon name="calendar" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
+                  <View style={{flexDirection:'column', marginTop:5, marginLeft:10}}>
+                    <Text style={styles.txtScheme}>次のお支払日</Text>
+                    <Button transparent onPress={() => {this.setState({isVisible: true})}}>
+                        <Text style={{fontSize: 18}, styles.txtScheme} >
+                          {this.formatDate()}
+                        </Text>
+                    </Button>
+                    <DateTimePickerModal
+                        cancelTextIOS={"キャンセル"}
+                        confirmTextIOS={"OK"}
+                        headerTextIOS={"日付を選択"}
+                        isVisible={this.state.isVisible}
+                        isDarkModeEnabled={this.scheme==='dark'}
+                        mode="date"
+                        minimumDate={this.state.due}
+                        onConfirm={this.handleConfirm}
+                        onCancel={() => {this.setState({isVisible: false})}}
+                        locale="ja"
+                    />
+                  </View>
                 </Item>
               </View>
             </Form>
@@ -501,11 +527,11 @@ export default class HomeScreen extends Component {
         </Modal>
 
         {/*Modal Sammon Button*/}
-        <View style={{top: '85%', left: '70%', position: 'absolute', }}>
+        <View style={{top: '85%', right: '5%', position: 'absolute'}}>
           <TouchableOpacity
             style={styles.circleButton}
             onPress={() => this.refs.addModal.open()}>
-            <Text style={{fontSize: 48, color: 'white'}}>+</Text>
+            <Icon name='plus' size={36} color={'white'} style={{top: 10}}></Icon>
           </TouchableOpacity>
         </View>
       </View>
@@ -640,29 +666,31 @@ const styles = StyleSheet.create({
   },
   
   // user settings
+  txtScheme: {
+    color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
+  },
+  bgScheme: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#ffffff',
+  },
+  uiScheme: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
+  },
   flatlist: {
     flex: 1.0,
-    backgroundColor: '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65,65,65)' : '#fff',
     borderTopWidth: 1,
-  },
-  header: {
-    backgroundColor: '#87C8FA',
+    borderTopColor: Appearance.getColorScheme() === 'dark' ? 'rgb(90, 90, 90)' : '#000',
   },
   circleButton: {
     backgroundColor: 'rgb(93, 43, 136)',
-    //marginLeft: 5,
-    //marginBottom: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    //paddingTop: 10,
-    //paddingBottom: 10,
-    height: 70,
-    width: 70,
+    height: 56,
+    width: 56,
     borderRadius: 120,
-    left: '80%',
   },
 
   modal: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65,65,65)' : '#fff',
     height: 720,
     borderTopStartRadius: 10,
   },

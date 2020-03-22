@@ -2,6 +2,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
+import { Appearance } from 'react-native-appearance'
 
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
@@ -10,7 +11,12 @@ import SettingsScreen from '../screens/SettingsScreen';
 
 const config = Platform.select({
   web: { headerMode: 'screen' },
-  default: {},
+  default: {
+    headerStytle: {
+      backgroundColor: Appearance.getColorScheme()==='dark'?'#000':'#fff'
+    },
+    headerMode: 'none'
+  },
 });
 
 const HomeStack = createStackNavigator(
@@ -40,7 +46,7 @@ const LinksStack = createStackNavigator(
   {
     Links: LinksScreen,
   },
-  config
+  config,
 );
 
 LinksStack.navigationOptions = {
@@ -56,7 +62,7 @@ const SettingsStack = createStackNavigator(
   {
     Settings: SettingsScreen,
   },
-  config
+  config,
 );
 
 SettingsStack.navigationOptions = {
@@ -68,11 +74,18 @@ SettingsStack.navigationOptions = {
 
 SettingsStack.path = '';
 
-const tabNavigator = createBottomTabNavigator({
-  HomeStack,
-  LinksStack,
-  SettingsStack,
-});
+const tabNavigator = createBottomTabNavigator(
+  {
+    HomeStack,
+    LinksStack,
+    SettingsStack,
+  },
+  {
+    tabBarOptions: {
+      style: {backgroundColor: Appearance.getColorScheme()==='dark'?'#000':'#fff'}
+    },
+  },
+  );
 
 tabNavigator.path = '';
 

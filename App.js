@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Root } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
+import { Appearance, AppearanceProvider } from 'react-native-appearance';
 
 import AppNavigator from './navigation/AppNavigator';
 
@@ -13,13 +14,18 @@ export default function App(props) {
 
   if (!isLoadingComplete && !props.skipLoadingScreen) {
     return (
-      <AppLoading
-        startAsync={loadResourcesAsync}
-        onError={handleLoadingError}
-        onFinish={() => handleFinishLoading(setLoadingComplete)}
-      />
+      <AppearanceProvider>
+        <AppLoading
+          startAsync={loadResourcesAsync}
+          onError={handleLoadingError}
+          onFinish={() => handleFinishLoading(setLoadingComplete)}
+        />
+      </AppearanceProvider>
     );
   } else {
+    let barStyle = Appearance.getColorScheme() === 'dark' ? 'light-content' : 'dark-content';
+    let barColor = Appearance.getColorScheme() === 'dark' ? 'rgb(188, 0, 255)':'rgb(98,0,238)';
+
     return (
       <AppearanceProvider>
         <Root>
@@ -63,6 +69,6 @@ function handleFinishLoading(setLoadingComplete) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff',
   },
 });
