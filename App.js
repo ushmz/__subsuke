@@ -3,6 +3,7 @@ import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
 import React, { useState } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Root } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import { Appearance, AppearanceProvider } from 'react-native-appearance';
 
@@ -27,7 +28,9 @@ export default function App(props) {
 
     return (
       <AppearanceProvider>
+        <Root>
           <AppNavigator />
+        </Root>
       </AppearanceProvider>
     );
   }
