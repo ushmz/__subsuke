@@ -23,6 +23,7 @@ import {
   Right,
   Picker,
   Title,
+  Toast,
 } from 'native-base';
 
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -37,7 +38,7 @@ export default class HomeScreen extends Component {
   
   constructor(props) {
     super(props);
-    this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '', due: new Date(), isVisible: false, token: ''};
+    this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '週', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
   }
@@ -149,6 +150,23 @@ export default class HomeScreen extends Component {
   }
 
   _onPressAdd = () => {
+    /**
+     * リストへのアイテム追加時に呼び出される関数
+     * 入力フォームの内容をデータベースに登録，通知サーバーに登録
+     * 追加した内容でStateを更新，入力フォームの内容をリセット
+     */
+
+    if (this.state.service === '' | this.state.price === '' | this.state.cycle === '') {
+      Toast.show({
+        text: '未入力の項目があります。',
+        buttonText: 'OK',
+        type: 'warning',
+        textStyle: styles.txtScheme,
+        style: {backgroundColor: 'rgb(65,65,65)'}
+      });
+      return;
+    }
+
     let rowid;
     let items = {};
 
@@ -219,7 +237,7 @@ export default class HomeScreen extends Component {
           list: items, 
           service: '', 
           price: '', 
-          cycle: '', 
+          cycle: '週',
           due: new Date()
         });
       }
@@ -434,8 +452,23 @@ export default class HomeScreen extends Component {
               </Item>
 
               <Item Picker>
-                <Label><Icon type="Entypo" name="cycle"></Icon></Label>
-                <Picker mdoe={'dropdown'} prompt={'支払いサイクル'} placeholder={'支払いサイクル'} selectedValue={this.state.cycle} onValueChange={(value) => {this.setState({cycle: value})}}>
+                <Label><Icon name="cached" size={32} color={this.scheme==='dark'?'rgb(200, 200, 200)':'#000'}></Icon></Label>
+                <Picker 
+                  itemStyle={styles.bgScheme}
+                  iosHeader={'支払いサイクル'}
+                  headerStyle={{backgroundColor: this.scheme==='dark'?'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'}}
+                  headerTitleStyle={{color: COLORS.SUBSUKE.TEXT}}
+                  headerBackButtonText={'戻る'}
+                  //headerBackButtonTextStyle={}
+                  modalStyle={styles.bgScheme}
+                  mode={'dropdown'}
+                  prompt={'支払いサイクル'} 
+                  placeholder={'支払いサイクル'}
+                  placeholderStyle={styles.txtScheme}
+                  textStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
+                  itemTextStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
+                  selectedValue={this.state.cycle} 
+                  onValueChange={(value) => {this.setState({cycle: value})}}>
                   <Picker.Item label={'毎週'} value={'週'} />
                   <Picker.Item label={'毎月'} value={'月'} />
                   <Picker.Item label={'毎年'} value={'年'} />
