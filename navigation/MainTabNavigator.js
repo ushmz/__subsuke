@@ -12,9 +12,6 @@ import SettingsScreen from '../screens/SettingsScreen';
 const config = Platform.select({
   web: { headerMode: 'screen' },
   default: {
-    headerStytle: {
-      backgroundColor: Appearance.getColorScheme()==='dark'?'#000':'#fff'
-    },
     headerMode: 'none'
   },
 });
@@ -82,7 +79,7 @@ const tabNavigator = createBottomTabNavigator(
   },
   {
     tabBarOptions: {
-      style: {backgroundColor: Appearance.getColorScheme()==='dark'?'#000':'#fff'}
+      style: {backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(40, 10, 60)':'rgb(250, 250, 250)'}
     },
   },
   );

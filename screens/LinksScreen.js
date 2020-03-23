@@ -1,7 +1,7 @@
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import { ScrollView, StyleSheet, View} from 'react-native';
-import { Body, Header, Text } from 'native-base';
+import { Body, Header, Left, Right,Text, Title } from 'native-base';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Touchable from 'react-native-platform-touchable';
 import { Appearance } from 'react-native-appearance';
@@ -9,12 +9,14 @@ import { Appearance } from 'react-native-appearance';
 export default function LinksScreen() {
   return (    
     <View style={{flex: 1}}> 
-      <Header style={styles.header} transparent>
+      <Header style={styles.header} transparent={true} iosBarStyle={Appearance.getColorScheme()==='dark'?'#fff':'#000'}>
+        <Left />
         <Body>
-          <Text style={styles.txtScheme}>Links</Text>
+          <Title style={[styles.txtScheme]}>Links</Title>
         </Body>
+        <Right />          
       </Header>
-      <ScrollView style={styles.container}>
+      <ScrollView style={[styles.container, styles.bgScheme]}>
         <LinksView iconName={'emoticon-wink-outline'} title={'Sorry! I\'m coding. Coming soon!'} link={'hoge'}/>
       </ScrollView>
     </View>
@@ -60,19 +62,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 15,
-    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(65,65,65)':'#fff',
   },
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
+    color: Appearance.getColorScheme() === 'dark' ? 'rgb(200, 200, 200)' : '#000',
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#ffffff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
   },
   header: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(188, 135, 255)' : 'rgb(181, 124, 252)',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'
   },
   titleText: {
     fontSize: 16,
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     //position: 'absolute'  TODO
   },
   link: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
     paddingHorizontal: 15,
     paddingVertical: 15,
     borderBottomWidth: StyleSheet.hairlineWidth,

@@ -1,20 +1,23 @@
 import React, {Component} from 'react';
 import {SectionList, StyleSheet, Text, View} from 'react-native';
 import { Appearance } from 'react-native-appearance';
-import { Header, Body, Title } from 'native-base';
+import { Header, Body, Left, Right, Title } from 'native-base';
+
+import COLORS from '../global/Color';
 
 export default function SettingsScreen() {
   /**
    * Go ahead and delete ExpoConfigView and replace it with your content;
    * we just wanted to give you a quick view of your config.
    */
-
   return (
     <View style={{flex: 1}}>
-      <Header style={styles.header} transparent>
+      <Header style={[styles.header]} transparent={true} iosBarStyle={Appearance.getColorScheme()==='dark'?'#fff':'#000'}>
+        <Left />
         <Body>
-          <Text style={styles.txtScheme}>Settings</Text>
+          <Title style={[styles.txtScheme]}>Settings</Title>
         </Body>
+        <Right />          
       </Header>
       <ConfigView />
     </View>
@@ -38,7 +41,7 @@ class ConfigView extends Component {
 
     return (
           <SectionList
-            style={styles.container}
+            style={[styles.container, styles.bgScheme]}
             renderItem={this._renderItem}
             renderSectionHeader={this._renderSectionHeader}
             stickySectionHeadersEnabled={true}
@@ -64,7 +67,6 @@ class ConfigView extends Component {
       );
     }
   };
-
 };
 
 const SectionHeader = ({ title }) => {
@@ -105,7 +107,6 @@ const Color = ({ value }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(65,65,65)':'#fff',
   },
   titleContainer: {
     paddingHorizontal: 15,
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   sectionHeaderContainer: {
-    backgroundColor: Appearance.getColorScheme()==='dark'?'rgb(45,45,45)':'#fbfbfb',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.YETDARKER : COLORS.LIGHT.YETDARKER,
     paddingVertical: 8,
     paddingHorizontal: 15,
     //borderWidth: StyleSheet.hairlineWidth,
@@ -153,15 +154,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
+    color: Appearance.getColorScheme() === 'dark' ? 'rgb(200, 200, 200)' : '#000',
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#ffffff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.DARKER : COLORS.LIGHT.DARKER,
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
   },
   header: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(188, 135, 255)' : 'rgb(181, 124, 252)',
-  }
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'
+  },
 });

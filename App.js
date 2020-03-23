@@ -6,6 +6,7 @@ import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Root } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import { Appearance, AppearanceProvider } from 'react-native-appearance';
+import * as SecureStore from 'expo-secure-store';
 
 import AppNavigator from './navigation/AppNavigator';
 
@@ -23,13 +24,10 @@ export default function App(props) {
       </AppearanceProvider>
     );
   } else {
-    let barStyle = Appearance.getColorScheme() === 'dark' ? 'light-content' : 'dark-content';
-    let barColor = Appearance.getColorScheme() === 'dark' ? 'rgb(188, 0, 255)':'rgb(98,0,238)';
-
     return (
       <AppearanceProvider>
         <Root>
-          <AppNavigator />
+          <AppNavigator screenProps={{theme: 'SUBSUKE'}} />
         </Root>
       </AppearanceProvider>
     );
@@ -65,6 +63,9 @@ function handleFinishLoading(setLoadingComplete) {
   setLoadingComplete(true);
 }
 
+function setTheme(theme) {
+
+}
 
 const styles = StyleSheet.create({
   container: {

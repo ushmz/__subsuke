@@ -15,7 +15,7 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "rgb(78, 26, 119)"
+      "backgroundColor": "#4e1077"
     },
     "updates": {
       "enabled": true,

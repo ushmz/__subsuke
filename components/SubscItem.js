@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import { Left, Right } from 'native-base';
-import {Appearance} from 'react-native-appearance';
+import { Appearance } from 'react-native-appearance';
+import COLORS from '../global/Color';
 
 const styles = StyleSheet.create({
   container: {
@@ -20,16 +21,24 @@ const styles = StyleSheet.create({
     marginLeft: '10%',
     fontSize: 20,
   },
-  billing: {
+  rightIem: {
     marginRight: '10%',
   },
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark' ? '#fff' : '#000',
+    color: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.TEXT : COLORS.LIGHT.TEXT,
   }
 });
 
 const SubscItem = props => {
-  const item = props;
+  const item = {
+    service: props.service,
+    price: props.price,
+    cycle: props.cycle,
+    year: props.year.toString(),
+    month: props.month.toString(),
+    date: props.date.toString(),
+    next: new Date(props.year, props.month, props.date)
+  };
 
   return (
     <View style={[styles.container, styles.txtScheme]}>
@@ -37,7 +46,8 @@ const SubscItem = props => {
         <Text style={[styles.name, styles.txtScheme]}>{item.service}</Text>
       </Left>
       <Right>
-        <Text style={[styles.billing, styles.txtScheme]}>{'¥ '+item.price}</Text>
+        <Text style={[styles.rightIem, styles.txtScheme, {fontSize: 18}]}>{'毎'+item.cycle+' ¥'+item.price}</Text>
+        <Text style={[styles.rightIem, styles.txtScheme]}>{'次回：'+item.year+'/'+item.month+'/'+item.date}</Text>
       </Right>
     </View>
   );

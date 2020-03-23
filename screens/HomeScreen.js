@@ -2,6 +2,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as SQLite from 'expo-sqlite';
 import React, { Component } from 'react';
 import {
+  AsyncStorage,
   FlatList,
   Platform,
   StyleSheet,
@@ -31,18 +32,46 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Modal from 'react-native-modalbox';
 import Swipeout from 'react-native-swipeout';
 import Swiper from 'react-native-swiper';
+import * as SecureStore from 'expo-secure-store';
 
 import registerForPushNotificationsAsync from '../components/NotificationRegister'
 import SubsucItem from '../components/SubscItem';
+import COLORS from '../global/Color';
+import StyledText from '../components/StyledText';
 
 export default class HomeScreen extends Component {
+
+  /**
+   * light mode :
+   *     text color : rgb(10, 10, 10)    -> yo!check!
+   *     header : rgb(175, 82, 222)
+   *     light : rgb(250, 250, 250)
+   *     lighter : rgb(240,240,240)
+   *     yetlighter : rgb(230,230,230)
+   * 
+   * dark mode :
+   *     text color : rgb(200, 200, 200)
+   *     header color : rgb(80, 20, 120)
+   *     dark :  rgb(75, 75, 75)
+   *     darker : rgb(65, 65, 65)
+   *     yetDarker : rgb(35, 35, 35)    -> yo!check!
+   * 
+   * subsuke theme :
+   *     text color : rgb(200, 200, 200)
+   *     header color : rgb(80, 20, 120)
+   *     dark :rgb(40, 10, 60)
+   *     darker : rgb(20, 5, 30)
+   *     yetDarker : rgb(10, 2, 15)
+   * 
+   */
   
   constructor(props) {
     super(props);
     this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '週', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
-    this.scheme = Appearance.getColorScheme();
+    this.theme = 'LIGHT';
+    this.theme = Appearance.getColorScheme();
   }
 
   componentDidMount() {
@@ -53,33 +82,21 @@ export default class HomeScreen extends Component {
      *   - プッシュトークンの登録．(TODO:アプリ起動時に移動)
      */
     let itemList = {};
+    console.log('/*--------------------------*/');
+    let theme = this.fetchUserTheme();
     console.log('start DBSync...');
     var proomiseDBSync = function() {
       return new Promise((resolve, reject) => {        
         const connection = SQLite.openDatabase('subsuke');
         connection.transaction(tx => {
-          /**************************************************
-           * drop table
-           *
-          tx.executeSql(
-            "drop table subscription",
-            null,
-            (tx, {rows}) => {
-              console.log('[componentDidMount] Successed to drop table.');
-            },
-            (tx, err) => {
-              console.log('[componentDidMount] Failed to drop table.');
-              console.log(err);
-              return true;
-            },
-          );
-          /*************************************************: */
             tx.executeSql(
-              "create table if not exists subscription (\
-                service varchar(64) not null,\
+              "create table if not exists subscriptions (\
+                service text not null,\
                 price int not null,\
-                cycle varchar(10) not null,\
-                due int not null\
+                cycle text not null,\
+                year int not null,\
+                month int not null,\
+                date int not null\
               )",
               null,
               (tx, {rows}) => {
@@ -91,35 +108,8 @@ export default class HomeScreen extends Component {
                 return true;
               },
             );
-          /***************************************************
-           * delete all items from database.
-           *
             tx.executeSql(
-              "delete from subscription",
-              null,
-              (tx, {rows}) => {console.log('delete success');},
-              (tx, error) => {
-                console.log('delete failed');
-                return true;
-              }
-            );
-          /**************************************************/
-          
-          /***************************************************
-           *
-            tx.executeSql(
-              "insert into subscription(service, price, cycle, due) values(?,?,?,?);",
-              ['dummy', 900, 'month', 10],
-              (tx, {rows}) => {console.log('insert success');},
-              (tx, error) => {
-                console.log('insert failed');
-                console.log(error);
-                return true;
-              }
-            );
-          /**************************************************/
-            tx.executeSql(
-              "select rowid, service, price, cycle, due from subscription;",
+              "select rowid, service, price, cycle, year, month, date from subscriptions;",
               null,
               (_, {rows}) => {
                 itemList = rows;
@@ -179,18 +169,20 @@ export default class HomeScreen extends Component {
     let items = {};
 
     const additional = {
-      'service': this.state.service,
-      'price': this.state.price,
-      'cycle': this.state.cycle,
-      'due': this.handleDuedate(this.state.due)
+      service: this.state.service,
+      price: this.state.price,
+      cycle: this.state.cycle,
+      year: this.state.due.getFullYear(),
+      month: this.state.due.getMonth()+1,
+      date: this.state.due.getDate()
     };
 
     const connection = SQLite.openDatabase('subsuke');
     connection.transaction(
       tx => {
         tx.executeSql(
-          "insert into subscription(service, price, cycle, due) values(?,?,?,?);",
-          [additional['service'], additional['price'], additional['cycle'], additional['due']],
+          "insert into subscriptions(service, price, cycle, year, month, date) values(?,?,?,?,?,?);",
+          [additional.service, additional.price, additional.cycle, additional.year, additional.month, additional.date],
           (tx, resultset) => {
             // Args : (tx, {rows})
             rowid = resultset['insertId'];
@@ -203,7 +195,7 @@ export default class HomeScreen extends Component {
           }
         );
         tx.executeSql(
-          'select rowid, service, price, cycle, due from subscription;',
+          'select rowid, service, price, cycle, year, month, date from subscriptions;',
           null,
           (_, {rows}) => {
             items = rows;
@@ -230,7 +222,7 @@ export default class HomeScreen extends Component {
               value: this.state.token,
             },
             user: {
-              username: 'rabhareit',
+              username: 'anonymous',
             },
             notification: {
               message: 'もうすぐ'+this.state.service+'のお支払日です．',
@@ -265,7 +257,7 @@ export default class HomeScreen extends Component {
     connection.transaction(
       tx => {
         tx.executeSql(
-          "delete from subscription where rowid = ?",
+          "delete from subscriptions where rowid = ?",
           [rowid],
           (tx, {rows}) => {
             console.log('[_onDelete] successed to delete item');
@@ -276,7 +268,7 @@ export default class HomeScreen extends Component {
           }
         );
         tx.executeSql(
-          'select rowid, service, price, cycle, due from subscription;',
+          'select rowid, service, price, cycle, year, month, date from subscriptions;',
           null,
           (_, {rows}) => {
             items = rows;
@@ -316,25 +308,6 @@ export default class HomeScreen extends Component {
     this.setState({[stateName]: value});
   };
 
-  handleDuedate = (input) => {
-    /**
-     * execute in _onPressAdd()
-     * this use the value of state[cycle]
-     * 
-     * 必要ない可能性があるので要検討
-     */
-    let duedate = '';
-    if (this.state.cycle === '週') {
-      duedate = input.getDay();
-    } else if (this.state.cycle === '月') {
-      duedate = input.getDate();
-    } else if (this.state.cycle === '年') {
-      duedate = (input.getMonth()+1)*100 + input.getDate();
-    }
-    //this.setState({due: duedate});
-    return duedate;
-  };
-
   handleConfirm = date => {
     this.setState({isVisible: false});
     this.setState({due: date});
@@ -347,10 +320,24 @@ export default class HomeScreen extends Component {
     return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + this.state.due.getDate() + "日"
   }
 
+  fetchUserTheme = async () => {
+    let theme = 'LIGHT'
+    try {
+      await AsyncStorage.getItem('theme', (_, value) => {
+        theme = value;
+        console.log(value);
+      });  
+    } catch (error) {
+      console.log(error);
+    }
+    return theme;
+  }
+
   render() {
     /**
      * レンダー関数
      */
+    console.log('[render()]')
     const itemList = this.state.list;
     var totalWeeklyCost = 0;
     var totalMonthlyCost = 0;
@@ -360,15 +347,15 @@ export default class HomeScreen extends Component {
         itemList._array.forEach((current) => {
           if (current.cycle === '週') {
             totalWeeklyCost += parseInt(current.price);
-            totalMonthlyCost += parseInt(current.price)*4;
-            totalYearlyCost += parseInt(current.price)*4*12;
+            totalMonthlyCost += parseInt(current.price*4);
+            totalYearlyCost += parseInt(current.price*4*12);
           } else if (current.cycle === '月') {
-            totalWeeklyCost += parseInt(current.price)/4;
+            totalWeeklyCost += parseInt(current.price/4);
             totalMonthlyCost += parseInt(current.price);
-            totalYearlyCost += parseInt(current.price)*12;
+            totalYearlyCost += parseInt(current.price*12);
           } else if (current.cycle === '年') {
-            totalWeeklyCost += parseInt(current.price)/12/4;
-            totalMonthlyCost += parseInt(current.price)/12;
+            totalWeeklyCost += parseInt(current.price/12/4);
+            totalMonthlyCost += parseInt(current.price/12);
             totalYearlyCost += parseInt(current.price);
           }
           //totalCost += parseInt(current.price);
@@ -380,7 +367,7 @@ export default class HomeScreen extends Component {
         return (
           <FlatList
             data={itemList._array}
-            style={styles.flatlist}
+            style={[styles.flatlist, styles.bgScheme]}
             keyExtractor={item => item.rowid.toString()}
             renderItem={({item}) => {
               const swipeBtn = [{
@@ -398,52 +385,58 @@ export default class HomeScreen extends Component {
           />
         )
       } else {
-        return <Text style={{textAlign: 'center'}, styles.txtScheme}>登録済みのサービスはありません</Text>            
+        /**
+         * Would like to insert image...
+         */
+        //return <StyledText style={{textAlign: 'center', fontSize: 18, marginTop: 10}} theme={'SUBSUKE'}>登録済みのサービスはありません</StyledText>
+        return <Text style={[{textAlign: 'center', fontSize: 18, marginTop: 10}, styles.txtScheme]}>登録済みのサービスはありません</Text>            
       }
     }
 
     return (
-      <View style={this.scheme==='dark' ? {backgroundColor: 'rgb(65,65,65)', flex: 1} : {flex: 1} }>
+      <View style={[styles.bgScheme, {flex: 1}]}>
         {/*Header 181 124 252 or 98 0 238*/}
-        <Header style={{backgroundColor: this.scheme==='dark'?'rgb(188, 135, 255)':'rgb(181, 124, 252)'}} transparent>
+        <Header style={{backgroundColor: this.theme==='dark'?'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'}} transparent={true} iosBarStyle={this.theme==='dark'?'#fff':'#000'}>
+          <Left />
           <Body>
-            <Title style={styles.txtScheme}>Subsuke</Title>
+            <Title style={{color: COLORS[Appearance.getColorScheme()==='dark'?'SUBSUKE':'LIGHT'].TEXT}}>Subsuke</Title>
           </Body>
+          <Right />
+          
         </Header>
 
-          <View style={styles.welcomeContainer}>
-            <Swiper style={styles.wrapper} showsButtons={true}>
-              <View style={styles.slide}>
-                <Text style={styles.txtScheme}>{'週あたり  ¥' + totalWeeklyCost}</Text>
-              </View>
-              <View style={styles.slide}>
-                <Text style={styles.txtScheme}>{'月あたり  ¥' + totalMonthlyCost}</Text>
-              </View>
-              <View style={styles.slide}>
-                <Text style={styles.txtScheme}>{'年あたり  ¥' + totalYearlyCost}</Text>
-              </View>
-            </Swiper>
-
-          </View>
+        <View style={{height: '20%'}}>
+          <Swiper containerStyle={styles.swiper} index={1} showsButtons={true} dotColor={Appearance.getColorScheme() === 'dark' ? 'rgba(255,255,255,.2)' : 'rgba(0,0,0,.2)'}>
+            <View style={styles.slide}>
+              <Text style={[styles.txtScheme, styles.totalCost]}>{'週あたり  ¥' + totalWeeklyCost}</Text>
+            </View>
+            <View style={styles.slide}>
+              <Text style={[styles.txtScheme, styles.totalCost]}>{'月あたり  ¥' + totalMonthlyCost}</Text>
+            </View>
+            <View style={styles.slide}>
+              <Text style={[styles.txtScheme, styles.totalCost]}>{'年あたり  ¥' + totalYearlyCost}</Text>
+            </View>
+          </Swiper>
+        </View>
 
         <UserFlatlist />
         
         {/*Modal Contents*/}
-        <Modal style={styles.modal} position={'bottom'} ref={'addModal'}>
+        <Modal style={styles.modal} position={'bottom'}  ref={'addModal'}>
           {/* Header */}
           <View style={{flex: 0.2, flexDirection: "row"}}>
             <Icon 
               style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} 
               name="close"
               size={32}
-              color={this.scheme==='dark'?'#fff':'#000'}
+              color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}
               onPress={() => this.refs.addModal.close()}></Icon>
             <View style={{flex: 0.8}} >
               <Icon
                 style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}}
                 name="chevron-down"
                 size={32}
-                color={this.scheme==='dark'?'#a0a0a0':'#000'}></Icon>
+                color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}></Icon>
             </View>
             <TouchableOpacity style={[styles.button, {flex: 0.1, marginRight: '1%'}]} onPress={this._onPressAdd} >
               <Text style={{color: 'white', fontSize: 18, textAlign: 'center', marginTop: 15}}>追加</Text>
@@ -456,30 +449,30 @@ export default class HomeScreen extends Component {
                 <Label></Label>
                 <TextInput type="text"
                        name={"service"}
-                       style={{fontSize: 36}}
+                       style={[{fontSize: 36}, styles.txtScheme]}
                        placeholder={"サブスクを追加"}
                        value={this.state.service}
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
               <Item >
-                <Label><Icon name="wallet" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
+                <Label><Icon name="wallet" size={32} color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}></Icon></Label>
                 <TextInput type="number"
                        keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
                        name={"price"}
-                       style={{fontSize: 24, margin: 10}}
+                       style={[{width: '80%',fontSize: 24, margin: 10}, styles.txtScheme]}
                        placeholder={"金額を追加"}
-                       placeholderTextColor={this.scheme==='dark'?'#a0a0a0':'#000'}
+                       placeholderTextColor={COLORS.SUBSUKE.TEXT}
                        value={this.state.price}
                        onChange={e => {this.setState({price: e.nativeEvent.text})}} />
               </Item>
 
               <Item Picker>
-                <Label><Icon name="cached" size={32} color={this.scheme==='dark'?'rgb(200, 200, 200)':'#000'}></Icon></Label>
+                <Label><Icon name="cached" size={32} color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}></Icon></Label>
                 <Picker 
                   itemStyle={styles.bgScheme}
                   iosHeader={'支払いサイクル'}
-                  headerStyle={{backgroundColor: this.scheme==='dark'?'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'}}
-                  headerTitleStyle={{color: COLORS.SUBSUKE.TEXT}}
+                  headerStyle={styles.header}
+                  headerTitleStyle={styles.txtScheme}
                   headerBackButtonText={'戻る'}
                   //headerBackButtonTextStyle={}
                   modalStyle={styles.bgScheme}
@@ -487,8 +480,8 @@ export default class HomeScreen extends Component {
                   prompt={'支払いサイクル'} 
                   placeholder={'支払いサイクル'}
                   placeholderStyle={styles.txtScheme}
-                  textStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
-                  itemTextStyle={{color: this.scheme==='dark'?'#fff':'#000'}}
+                  textStyle={styles.txtScheme}
+                  itemTextStyle={styles.txtScheme}
                   selectedValue={this.state.cycle} 
                   onValueChange={(value) => {this.setState({cycle: value})}}>
                   <Picker.Item label={'毎週'} value={'週'} />
@@ -499,7 +492,7 @@ export default class HomeScreen extends Component {
 
               <View>
                 <Item >
-                  <Label><Icon name="calendar" size={32} color={this.scheme==='dark'?'#fff':'#000'}></Icon></Label>
+                  <Label><Icon name="calendar" size={32} color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}></Icon></Label>
                   <View style={{flexDirection:'column', marginTop:5, marginLeft:10}}>
                     <Text style={styles.txtScheme}>次のお支払日</Text>
                     <Button transparent onPress={() => {this.setState({isVisible: true})}}>
@@ -592,9 +585,8 @@ const styles = StyleSheet.create({
   welcomeContainer: {
     //flex: 0.2,
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-    height: '20%',
+    //marginTop: 10,
+    //marginBottom: 20,
   },
   welcomeImage: {
     width: 100,
@@ -667,17 +659,20 @@ const styles = StyleSheet.create({
   
   // user settings
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark'?'#fff':'#000',
+    color: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.TEXT : COLORS.LIGHT.TEXT,
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65, 65, 65)' : '#ffffff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.DARKER : 'rgb(242,242,242)',
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
   },
+  header: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'
+  },
   flatlist: {
     flex: 1.0,
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65,65,65)' : '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.DARKER : '#fff',
     borderTopWidth: 1,
     borderTopColor: Appearance.getColorScheme() === 'dark' ? 'rgb(90, 90, 90)' : '#000',
   },
@@ -688,10 +683,9 @@ const styles = StyleSheet.create({
     width: 56,
     borderRadius: 120,
   },
-
   modal: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(65,65,65)' : '#fff',
-    height: 720,
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
+    height: '75%',
     borderTopStartRadius: 10,
   },
   button: {
@@ -713,6 +707,16 @@ const styles = StyleSheet.create({
     width: '10%',
     //alignItems: 'flex-end',
   },
+  slide: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  swiper: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(10, 2, 15)' : 'rgb(232,232,232)'
+  },
+  _swiper: {
+    //backgroundColor: COLORS[DefaultPreference.get('theme')].YETDARKER,
+  },
   textInput: {
     borderRadius: 10,
     borderColor: 'black',
@@ -722,9 +726,10 @@ const styles = StyleSheet.create({
     marginVertical: '10%',
     textAlign: 'center',
   },
-  wrapper:{},
-  slide: {
-    justifyContent: 'center',
-    alignItems: 'center',
+  totalCost: {
+    fontSize: 32,
+    marginTop: 30,
+  },
+  wrapper: {
   },
 });
