@@ -25,7 +25,7 @@ export default function App(props) {
   } else {
     return (
       <AppearanceProvider>
-          <AppNavigator />
+          <AppNavigator screenProps={{theme: 'SUBSUKE'}} />
       </AppearanceProvider>
     );
   }

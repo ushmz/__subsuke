@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   sectionHeaderContainer: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(10, 2, 15)' : '#fbfbfb',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.YETDARKER : COLORS.LIGHT.YETDARKER,
     paddingVertical: 8,
     paddingHorizontal: 15,
     //borderWidth: StyleSheet.hairlineWidth,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     color: Appearance.getColorScheme() === 'dark' ? 'rgb(200, 200, 200)' : '#000',
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.DARKER : COLORS.LIGHT.DARKER,
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
