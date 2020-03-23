@@ -3,6 +3,7 @@ import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
 import React, { useState } from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Root } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import { Appearance, AppearanceProvider } from 'react-native-appearance';
 import * as SecureStore from 'expo-secure-store';
@@ -25,7 +26,9 @@ export default function App(props) {
   } else {
     return (
       <AppearanceProvider>
+        <Root>
           <AppNavigator screenProps={{theme: 'SUBSUKE'}} />
+        </Root>
       </AppearanceProvider>
     );
   }
