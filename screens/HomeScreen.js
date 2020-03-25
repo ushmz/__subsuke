@@ -32,46 +32,23 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Modal from 'react-native-modalbox';
 import Swipeout from 'react-native-swipeout';
 import Swiper from 'react-native-swiper';
-import * as SecureStore from 'expo-secure-store';
 
+import NotificationHandler from '../components/NotificationHandler';
 import registerForPushNotificationsAsync from '../components/NotificationRegister'
 import SubsucItem from '../components/SubscItem';
-import COLORS from '../global/Color';
+import COLORS from '../constants/Color';
 import StyledText from '../components/StyledText';
 
 export default class HomeScreen extends Component {
-
-  /**
-   * light mode :
-   *     text color : rgb(10, 10, 10)    -> yo!check!
-   *     header : rgb(175, 82, 222)
-   *     light : rgb(250, 250, 250)
-   *     lighter : rgb(240,240,240)
-   *     yetlighter : rgb(230,230,230)
-   * 
-   * dark mode :
-   *     text color : rgb(200, 200, 200)
-   *     header color : rgb(80, 20, 120)
-   *     dark :  rgb(75, 75, 75)
-   *     darker : rgb(65, 65, 65)
-   *     yetDarker : rgb(35, 35, 35)    -> yo!check!
-   * 
-   * subsuke theme :
-   *     text color : rgb(200, 200, 200)
-   *     header color : rgb(80, 20, 120)
-   *     dark :rgb(40, 10, 60)
-   *     darker : rgb(20, 5, 30)
-   *     yetDarker : rgb(10, 2, 15)
-   * 
-   */
   
   constructor(props) {
     super(props);
-    this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '週', due: new Date(), isVisible: false, token: ''};
+    this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '月', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
     this.theme = 'LIGHT';
     this.theme = Appearance.getColorScheme();
+    this.handler = new NotificationHandler();
   }
 
   componentDidMount() {
@@ -85,7 +62,7 @@ export default class HomeScreen extends Component {
     console.log('/*--------------------------*/');
     let theme = this.fetchUserTheme();
     console.log('start DBSync...');
-    var proomiseDBSync = function() {
+    var promiseDBSync = function() {
       return new Promise((resolve, reject) => {        
         const connection = SQLite.openDatabase('subsuke');
         connection.transaction(tx => {
@@ -133,7 +110,7 @@ export default class HomeScreen extends Component {
       })
     };
 
-    proomiseDBSync().then((itemList) => {
+    promiseDBSync().then((itemList) => {
       this.setState({list: itemList});
       console.log('sync complete.');
     }).catch((error) => {
@@ -144,7 +121,7 @@ export default class HomeScreen extends Component {
       this.setState({token: token});
     }).catch((error) => {
       console.log(error);
-    });
+    });  
   }
 
   _onPressAdd = () => {
@@ -159,7 +136,7 @@ export default class HomeScreen extends Component {
         text: '未入力の項目があります。',
         buttonText: 'OK',
         type: 'warning',
-        textStyle: styles.txtScheme,
+        textStyle: {color: COLORS.DARK.TEXT},
         style: {backgroundColor: 'rgb(65,65,65)'}
       });
       return;
@@ -210,7 +187,6 @@ export default class HomeScreen extends Component {
       },
       () => {console.log('[_onPressAdd] failed to fetch user item')},
       () => {
-
         let resp = fetch(this.PUSH_ENDPOINT, {
           method: 'POST',
           headers: {
@@ -237,7 +213,7 @@ export default class HomeScreen extends Component {
           list: items, 
           service: '', 
           price: '', 
-          cycle: '週',
+          cycle: '月',
           due: new Date()
         });
       }
@@ -283,7 +259,7 @@ export default class HomeScreen extends Component {
       },
       () => {console.log('[_onDelete] Transaction failed.');},
       () => {
-        console.log('[_omDelete] Transaction success.');
+        console.log('[_onDelete] Transaction success.');
         
         fetch(this.PUSH_ENDPOINT+'/'+rowid+':'+this.state.token, {
           method: 'DELETE',
@@ -293,7 +269,7 @@ export default class HomeScreen extends Component {
           list: items, 
           service: '', 
           price: '', 
-          cycle: '', 
+          cycle: '月', 
           due: new Date()
         });
       }
@@ -337,7 +313,6 @@ export default class HomeScreen extends Component {
     /**
      * レンダー関数
      */
-    console.log('[render()]')
     const itemList = this.state.list;
     var totalWeeklyCost = 0;
     var totalMonthlyCost = 0;
@@ -505,7 +480,7 @@ export default class HomeScreen extends Component {
                         confirmTextIOS={"OK"}
                         headerTextIOS={"日付を選択"}
                         isVisible={this.state.isVisible}
-                        isDarkModeEnabled={this.scheme==='dark'}
+                        isDarkModeEnabled={Appearance.getColorScheme()==='dark'}
                         mode="date"
                         minimumDate={this.state.due}
                         onConfirm={this.handleConfirm}
