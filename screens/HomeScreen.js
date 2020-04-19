@@ -293,7 +293,7 @@ export default class HomeScreen extends Component {
     /**
      * State(due)のデータオブジェクトを日本語表記にフォーマットする．
      */
-    return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + this.state.due.getDate() + "日"
+    return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + (this.state.due.getDate()+1) + "日"
   }
 
   fetchUserTheme = async () => {
@@ -307,6 +307,12 @@ export default class HomeScreen extends Component {
       console.log(error);
     }
     return theme;
+  }
+
+  getMinimumDate() {
+    let minimumDate = new Date();
+    minimumDate.setDate(minimumDate.getDate()+1);
+    return minimumDate;
   }
 
   render() {
@@ -482,7 +488,7 @@ export default class HomeScreen extends Component {
                         isVisible={this.state.isVisible}
                         isDarkModeEnabled={Appearance.getColorScheme()==='dark'}
                         mode="date"
-                        minimumDate={this.state.due}
+                        minimumDate={this.getMinimumDate()}
                         onConfirm={this.handleConfirm}
                         onCancel={() => {this.setState({isVisible: false})}}
                         locale="ja"
@@ -498,7 +504,15 @@ export default class HomeScreen extends Component {
         <View style={{top: '85%', right: '5%', position: 'absolute'}}>
           <TouchableOpacity
             style={styles.circleButton}
-            onPress={() => this.refs.addModal.open()}>
+            onPress={() => {
+              this.refs.addModal.open();
+              this.setState({
+                service: '', 
+                price: '', 
+                cycle: '月', 
+                due: new Date()
+              });
+            }}>
             <Icon name='plus' size={36} color={'white'} style={{top: 10}}></Icon>
           </TouchableOpacity>
         </View>
