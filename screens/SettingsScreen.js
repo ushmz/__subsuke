@@ -3,7 +3,7 @@ import {SectionList, StyleSheet, Text, View} from 'react-native';
 import { Appearance } from 'react-native-appearance';
 import { Header, Body, Left, Right, Title } from 'native-base';
 
-import COLORS from '../global/Color';
+import COLORS from '../constants/Color';
 
 export default function SettingsScreen() {
   /**

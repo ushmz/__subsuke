@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import { Left, Right } from 'native-base';
 import { Appearance } from 'react-native-appearance';
-import COLORS from '../global/Color';
+import COLORS from '../constants/Color';
 
 const styles = StyleSheet.create({
   container: {

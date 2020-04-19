@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text } from 'react-native';
-import COLORS from '../global/Color';
+import COLORS from '../constants/Color';
 
 export default function StyledText(props) {
   if (props.theme === 'LIGHT') {

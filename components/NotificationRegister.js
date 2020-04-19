@@ -14,7 +14,7 @@ export default async function registerForPushNotificationsAsync() {
   };
 
   if (finalStatus !== 'granted') {
-    alert('No notification permissions!');
+    alert('No notification permissions!!!');
     return;
   };
 
@@ -33,7 +33,7 @@ export default async function registerForPushNotificationsAsync() {
         value: token,
       },
       user: {
-        username: 'rabhareit',
+        username: '',
       },
     }),
   });
