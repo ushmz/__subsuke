@@ -3,7 +3,6 @@
     "name": "Subsuke",
     "slug": "Subsuke",
     "privacy": "unlisted",
-    "sdkVersion": "36.0.0",
     "platforms": [
       "ios",
       "android"
