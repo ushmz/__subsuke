@@ -1,8 +1,6 @@
 import * as WebBrowser from 'expo-web-browser';
-import * as SQLite from 'expo-sqlite';
 import React, { Component } from 'react';
 import {
-  AsyncStorage,
   FlatList,
   Platform,
   StyleSheet,
@@ -37,7 +35,9 @@ import NotificationHandler from '../components/NotificationHandler';
 import registerForPushNotificationsAsync from '../components/NotificationRegister'
 import SubsucItem from '../components/SubscItem';
 import COLORS from '../constants/Color';
-import StyledText from '../components/StyledText';
+import totalCost from '../services/totalCost';
+import { createDBIfNotExistAsync, selectAllAsync, insertItemAsync, deleteItemByRowidAsync } from '../services/SQLRepository';
+import { registNotification, deleteNotification } from '../services/NotificationServerRepository';
 
 export default class HomeScreen extends Component {
   
@@ -46,7 +46,7 @@ export default class HomeScreen extends Component {
     this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '月', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
-    this.theme = 'LIGHT';
+    //this.theme = props.screenProps.theme;
     this.theme = Appearance.getColorScheme();
     this.handler = new NotificationHandler();
   }
@@ -58,63 +58,14 @@ export default class HomeScreen extends Component {
      *   - データベースの内容をアイテムリスト(State)に反映
      *   - プッシュトークンの登録．(TODO:アプリ起動時に移動)
      */
-    let itemList = {};
     console.log('/*--------------------------*/');
-    let theme = this.fetchUserTheme();
     console.log('start DBSync...');
-    var promiseDBSync = function() {
-      return new Promise((resolve, reject) => {        
-        const connection = SQLite.openDatabase('subsuke');
-        connection.transaction(tx => {
-            tx.executeSql(
-              "create table if not exists subscriptions (\
-                service text not null,\
-                price int not null,\
-                cycle text not null,\
-                year int not null,\
-                month int not null,\
-                date int not null\
-              )",
-              null,
-              (tx, {rows}) => {
-                console.log('[componentDidMount] Successed to connect DB.');
-              },
-              (tx, err) => {
-                console.log('[componentDidMount] Failed to connect DB.');
-                console.log(err);
-                return true;
-              },
-            );
-            tx.executeSql(
-              "select rowid, service, price, cycle, year, month, date from subscriptions;",
-              null,
-              (_, {rows}) => {
-                itemList = rows;
-              },
-              (tx, err) => {
-                console.log('[componentDidMount] Failed to collect data.');
-                console.log(err);
-                return true;
-              }
-            );
-          },
-          () => {
-            reject('[componentDidMount] Transaction failed.');
-            reject({_array: [], length: 0});
-          },
-          () => {
-            console.log('[componentDidMount] Transaction successed.');
-            resolve(itemList);
-          }
-        );
-      })
-    };
 
-    promiseDBSync().then((itemList) => {
-      this.setState({list: itemList});
+    createDBIfNotExistAsync()
+    .then( _ => selectAllAsync() )
+    .then( resolved => {
+      this.setState({list: resolved});
       console.log('sync complete.');
-    }).catch((error) => {
-      console.log(error);
     });
 
     registerForPushNotificationsAsync().then((token) => {
@@ -130,7 +81,6 @@ export default class HomeScreen extends Component {
      * 入力フォームの内容をデータベースに登録，通知サーバーに登録
      * 追加した内容でStateを更新，入力フォームの内容をリセット
      */
-
     if (this.state.service === '' | this.state.price === '' | this.state.cycle === '') {
       Toast.show({
         text: '未入力の項目があります。',
@@ -142,82 +92,28 @@ export default class HomeScreen extends Component {
       return;
     }
 
-    let rowid;
-    let items = {};
-
     const additional = {
       service: this.state.service,
       price: this.state.price,
       cycle: this.state.cycle,
       year: this.state.due.getFullYear(),
       month: this.state.due.getMonth()+1,
-      date: this.state.due.getDate()
+      date: this.state.due.getDate(),
+      due: this.state.due
     };
 
-    const connection = SQLite.openDatabase('subsuke');
-    connection.transaction(
-      tx => {
-        tx.executeSql(
-          "insert into subscriptions(service, price, cycle, year, month, date) values(?,?,?,?,?,?);",
-          [additional.service, additional.price, additional.cycle, additional.year, additional.month, additional.date],
-          (tx, resultset) => {
-            // Args : (tx, {rows})
-            rowid = resultset['insertId'];
-            console.log('[_onPressAdd] insert success (insert ID : ' + rowid+')');
-          },
-          (tx, error) => {
-            console.log('[_onPressAdd] failed to insert');
-            console.log(error);
-            return true;
-          }
-        );
-        tx.executeSql(
-          'select rowid, service, price, cycle, year, month, date from subscriptions;',
-          null,
-          (_, {rows}) => {
-            items = rows;
-            console.log('[_onPressAdd] success to collect data.');
-          },
-          (tx, error) => {
-            console.log('[_onPressAdd] Cannot correct data.');
-            console.log(error);
-            return true;
-          }
-        );
-      },
-      () => {console.log('[_onPressAdd] failed to fetch user item')},
-      () => {
-        let resp = fetch(this.PUSH_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: {
-              value: this.state.token,
-            },
-            user: {
-              username: 'anonymous',
-            },
-            notification: {
-              message: 'もうすぐ'+this.state.service+'のお支払日です．',
-              cycle: this.state.cycle,
-              date: this.state.due,
-              rowid: rowid,
-            },
-          }),
-        });
-
-        this.setState({
-          list: items, 
-          service: '', 
-          price: '', 
-          cycle: '月',
-          due: new Date()
-        });
-      }
-    );
+    insertItemAsync(additional)
+    .then( insertId => registNotification(additional, insertId) )
+    .then( _ => selectAllAsync() )
+    .then( resolved => {
+      this.setState({
+        list: resolved, 
+        service: '', 
+        price: '', 
+        cycle: '月',
+        due: new Date()
+      });  
+    });
     this.refs.addModal.close();
   }
 
@@ -227,54 +123,31 @@ export default class HomeScreen extends Component {
      * データベースから削除，通知サーバーから削除
      * 削除された内容でStateを更新，入力フォームの内容をリセット
      */
+    deleteItemByRowidAsync(rowid)
+    .then(  _ => deleteNotification(rowid, this.state.token) )
+    .then(  _ => selectAllAsync() )
+    .then( resolved => {
+      this.setState({
+        list: resolved, 
+        service: '', 
+        price: '', 
+        cycle: '月', 
+        due: new Date()
+      });
+    });
+  }
 
-    let items = {};
-    const connection = SQLite.openDatabase('subsuke');
-    connection.transaction(
-      tx => {
-        tx.executeSql(
-          "delete from subscriptions where rowid = ?",
-          [rowid],
-          (tx, {rows}) => {
-            console.log('[_onDelete] successed to delete item');
-          },
-          (tx, error) => {
-            console.log('[_onDelete] failed to delete item');
-            return true;
-          }
-        );
-        tx.executeSql(
-          'select rowid, service, price, cycle, year, month, date from subscriptions;',
-          null,
-          (_, {rows}) => {
-            items = rows;
-            console.log('[_onDelete] success to collect data.');
-          },
-          (tx, error) => {
-            console.log('[_onDelete] Cannot correct data.');
-            console.log(error);
-            return true;
-          }
-        );
-      },
-      () => {console.log('[_onDelete] Transaction failed.');},
-      () => {
-        console.log('[_onDelete] Transaction success.');
-        
-        fetch(this.PUSH_ENDPOINT+'/'+rowid+':'+this.state.token, {
-          method: 'DELETE',
-        });
-
-        this.setState({
-          list: items, 
-          service: '', 
-          price: '', 
-          cycle: '月', 
-          due: new Date()
-        });
-      }
-    )
-  } 
+  _onUpdated = () => {
+    selectAllAsync().then( resolved => {
+      this.setState({
+        list: resolved, 
+        service: '', 
+        price: '', 
+        cycle: '月', 
+        due: new Date()
+      });
+    })
+  }
 
   setValue = (stateName, value) => {
     /**
@@ -296,19 +169,6 @@ export default class HomeScreen extends Component {
     return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + (this.state.due.getDate()+1) + "日"
   }
 
-  fetchUserTheme = async () => {
-    let theme = 'LIGHT'
-    try {
-      await AsyncStorage.getItem('theme', (_, value) => {
-        theme = value;
-        console.log(value);
-      });  
-    } catch (error) {
-      console.log(error);
-    }
-    return theme;
-  }
-
   getMinimumDate() {
     let minimumDate = new Date();
     minimumDate.setDate(minimumDate.getDate()+1);
@@ -320,28 +180,8 @@ export default class HomeScreen extends Component {
      * レンダー関数
      */
     const itemList = this.state.list;
-    var totalWeeklyCost = 0;
-    var totalMonthlyCost = 0;
-    var totalYearlyCost = 0;
-    
-    if ((itemList.length) !== 0 ){
-        itemList._array.forEach((current) => {
-          if (current.cycle === '週') {
-            totalWeeklyCost += parseInt(current.price);
-            totalMonthlyCost += parseInt(current.price*4);
-            totalYearlyCost += parseInt(current.price*4*12);
-          } else if (current.cycle === '月') {
-            totalWeeklyCost += parseInt(current.price/4);
-            totalMonthlyCost += parseInt(current.price);
-            totalYearlyCost += parseInt(current.price*12);
-          } else if (current.cycle === '年') {
-            totalWeeklyCost += parseInt(current.price/12/4);
-            totalMonthlyCost += parseInt(current.price/12);
-            totalYearlyCost += parseInt(current.price);
-          }
-          //totalCost += parseInt(current.price);
-        });
-    }
+    let totals = totalCost(itemList);
+
 
     let UserFlatlist = () => {
       if (itemList.length !== 0) {
@@ -358,9 +198,13 @@ export default class HomeScreen extends Component {
                 onPress: () => {this._onDelete(item.rowid.toString())},
               }];
               return (
-                <Swipeout right={swipeBtn} autoClose={true} backgroundColor='transparent'>
-                  <SubsucItem {...item} />
-                </Swipeout>
+                <View>
+                  <Swipeout right={swipeBtn} autoClose={true} backgroundColor='transparent'>
+                    <TouchableOpacity onPress={ () => this.props.navigation.navigate('Detail', {params: item, onUpdated: this._onUpdated})} >
+                      <SubsucItem {...item} />
+                    </TouchableOpacity>
+                  </Swipeout>
+                </View>
               );
             }}
           />
@@ -389,13 +233,13 @@ export default class HomeScreen extends Component {
         <View style={{height: '20%'}}>
           <Swiper containerStyle={styles.swiper} index={1} showsButtons={true} dotColor={Appearance.getColorScheme() === 'dark' ? 'rgba(255,255,255,.2)' : 'rgba(0,0,0,.2)'}>
             <View style={styles.slide}>
-              <Text style={[styles.txtScheme, styles.totalCost]}>{'週あたり  ¥' + totalWeeklyCost}</Text>
+              <Text style={[styles.txtScheme, styles.totalCost]}>{'週あたり  ¥' + totals.weekly}</Text>
             </View>
             <View style={styles.slide}>
-              <Text style={[styles.txtScheme, styles.totalCost]}>{'月あたり  ¥' + totalMonthlyCost}</Text>
+              <Text style={[styles.txtScheme, styles.totalCost]}>{'月あたり  ¥' + totals.monthly}</Text>
             </View>
             <View style={styles.slide}>
-              <Text style={[styles.txtScheme, styles.totalCost]}>{'年あたり  ¥' + totalYearlyCost}</Text>
+              <Text style={[styles.txtScheme, styles.totalCost]}>{'年あたり  ¥' + totals.yearly}</Text>
             </View>
           </Swiper>
         </View>

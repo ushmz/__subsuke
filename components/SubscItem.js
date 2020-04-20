@@ -41,7 +41,7 @@ const SubscItem = props => {
   };
 
   return (
-    <View style={[styles.container, styles.txtScheme]}>
+    <View style={[styles.container, styles.txtScheme]} >
       <Left>
         <Text style={[styles.name, styles.txtScheme]}>{item.service}</Text>
       </Left>
