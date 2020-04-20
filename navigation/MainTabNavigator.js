@@ -8,17 +8,17 @@ import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
 import LinksScreen from '../screens/LinksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import DetailScreen from '../screens/DetailScreen';
 
 const config = Platform.select({
   web: { headerMode: 'screen' },
-  default: {
-    headerMode: 'none'
-  },
+  default: { headerMode: 'none' },
 });
 
 const HomeStack = createStackNavigator(
   {
     Home: HomeScreen,
+    Detail: DetailScreen,
   },
   config
 );
