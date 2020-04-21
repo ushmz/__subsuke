@@ -34,7 +34,7 @@ import Swiper from 'react-native-swiper';
 import NotificationHandler from '../components/NotificationHandler';
 import registerForPushNotificationsAsync from '../components/NotificationRegister'
 import SubsucItem from '../components/SubscItem';
-import COLORS from '../constants/Color';
+import { COLORS, THEME } from '../constants/Color';
 import totalCost from '../services/totalCost';
 import { createDBIfNotExistAsync, selectAllAsync, insertItemAsync, deleteItemByRowidAsync } from '../services/SQLRepository';
 import { registNotification, deleteNotification } from '../services/NotificationServerRepository';
@@ -46,8 +46,8 @@ export default class HomeScreen extends Component {
     this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '月', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
-    //this.theme = props.screenProps.theme;
-    this.theme = Appearance.getColorScheme();
+    this.theme = props.screenProps.theme;
+    //this.theme = Appearance.getColorScheme();
     this.handler = new NotificationHandler();
   }
 
@@ -69,9 +69,10 @@ export default class HomeScreen extends Component {
     });
 
     registerForPushNotificationsAsync().then((token) => {
+      if (token===undefined) {token = 'thisissimulator'};
       this.setState({token: token});
     }).catch((error) => {
-      console.log(error);
+      this.setState({token: 'thisissimulator'});
     });  
   }
 
@@ -86,13 +87,14 @@ export default class HomeScreen extends Component {
         text: '未入力の項目があります。',
         buttonText: 'OK',
         type: 'warning',
-        textStyle: {color: COLORS.DARK.TEXT},
+        textStyle: {color: THEME.DARK.TEXT},
         style: {backgroundColor: 'rgb(65,65,65)'}
       });
       return;
     }
 
     const additional = {
+      token: this.state.token,
       service: this.state.service,
       price: this.state.price,
       cycle: this.state.cycle,
@@ -200,7 +202,10 @@ export default class HomeScreen extends Component {
               return (
                 <View>
                   <Swipeout right={swipeBtn} autoClose={true} backgroundColor='transparent'>
-                    <TouchableOpacity onPress={ () => this.props.navigation.navigate('Detail', {params: item, onUpdated: this._onUpdated})} >
+                    <TouchableOpacity
+                        onPress={ () => {
+                          this.props.navigation.navigate('Detail', {token: this.state.token, params: item, onUpdated: this._onUpdated})}
+                        }>
                       <SubsucItem {...item} />
                     </TouchableOpacity>
                   </Swipeout>
@@ -221,10 +226,10 @@ export default class HomeScreen extends Component {
     return (
       <View style={[styles.bgScheme, {flex: 1}]}>
         {/*Header 181 124 252 or 98 0 238*/}
-        <Header style={{backgroundColor: this.theme==='dark'?'rgb(80, 20, 120)' : 'rgb(175, 82, 222)'}} transparent={true} iosBarStyle={this.theme==='dark'?'#fff':'#000'}>
+        <Header style={styles.header} transparent={true} iosBarStyle={this.theme==='dark'?'#fff':'#000'}>
           <Left />
           <Body>
-            <Title style={{color: COLORS[Appearance.getColorScheme()==='dark'?'SUBSUKE':'LIGHT'].TEXT}}>Subsuke</Title>
+            <Title style={{color: THEME[this.theme].TEXT}}>Subsuke</Title>
           </Body>
           <Right />
           
@@ -254,14 +259,14 @@ export default class HomeScreen extends Component {
               style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} 
               name="close"
               size={32}
-              color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}
+              color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}
               onPress={() => this.refs.addModal.close()}></Icon>
             <View style={{flex: 0.8}} >
               <Icon
                 style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}}
                 name="chevron-down"
                 size={32}
-                color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}></Icon>
+                color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}></Icon>
             </View>
             <TouchableOpacity style={[styles.button, {flex: 0.1, marginRight: '1%'}]} onPress={this._onPressAdd} >
               <Text style={{color: 'white', fontSize: 18, textAlign: 'center', marginTop: 15}}>追加</Text>
@@ -280,19 +285,19 @@ export default class HomeScreen extends Component {
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
               <Item >
-                <Label><Icon name="wallet" size={32} color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}></Icon></Label>
+                <Label><Icon name="wallet" size={32} color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}></Icon></Label>
                 <TextInput type="number"
                        keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
                        name={"price"}
                        style={[{width: '80%',fontSize: 24, margin: 10}, styles.txtScheme]}
                        placeholder={"金額を追加"}
-                       placeholderTextColor={COLORS.SUBSUKE.TEXT}
+                       placeholderTextColor={THEME.SUBSUKE.TEXT}
                        value={this.state.price}
                        onChange={e => {this.setState({price: e.nativeEvent.text})}} />
               </Item>
 
               <Item Picker>
-                <Label><Icon name="cached" size={32} color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}></Icon></Label>
+                <Label><Icon name="cached" size={32} color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}></Icon></Label>
                 <Picker 
                   itemStyle={styles.bgScheme}
                   iosHeader={'支払いサイクル'}
@@ -317,7 +322,7 @@ export default class HomeScreen extends Component {
 
               <View>
                 <Item >
-                  <Label><Icon name="calendar" size={32} color={Appearance.getColorScheme()==='dark'?COLORS.SUBSUKE.TEXT:COLORS.LIGHT.TEXT}></Icon></Label>
+                  <Label><Icon name="calendar" size={32} color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}></Icon></Label>
                   <View style={{flexDirection:'column', marginTop:5, marginLeft:10}}>
                     <Text style={styles.txtScheme}>次のお支払日</Text>
                     <Button transparent onPress={() => {this.setState({isVisible: true})}}>
@@ -492,10 +497,10 @@ const styles = StyleSheet.create({
   
   // user settings
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.TEXT : COLORS.LIGHT.TEXT,
+    color: Appearance.getColorScheme() === 'dark' ? THEME.SUBSUKE.TEXT : THEME.LIGHT.TEXT,
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.DARKER : 'rgb(242,242,242)',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? THEME.SUBSUKE.DARKER : 'rgb(242,242,242)',
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
@@ -505,7 +510,7 @@ const styles = StyleSheet.create({
   },
   flatlist: {
     flex: 1.0,
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.DARKER : '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? THEME.SUBSUKE.DARKER : '#fff',
     borderTopWidth: 1,
     borderTopColor: Appearance.getColorScheme() === 'dark' ? 'rgb(90, 90, 90)' : '#000',
   },
@@ -548,7 +553,7 @@ const styles = StyleSheet.create({
     backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(10, 2, 15)' : 'rgb(232,232,232)'
   },
   _swiper: {
-    //backgroundColor: COLORS[DefaultPreference.get('theme')].YETDARKER,
+    //backgroundColor: THEME[DefaultPreference.get('theme')].YETDARKER,
   },
   textInput: {
     borderRadius: 10,

@@ -115,13 +115,6 @@ export function updateItemAsync(item) {
               // Column name couldn't define by "?" placeholder? (cause using placeholder, chars are escaped.)
               `update subscriptions set ${key} = '${item[key]}' where rowid = ${item['rowid']};`,
               null,
-              (tx, rs) => {},
-              (tx, err) => {
-                console.log(err);
-                console.log(key);
-                console.log(item[key]);
-                console.log(item['rowid']);
-              }
             );
           };
         });

@@ -1,4 +1,4 @@
-export default {
+const THEME = {
   LIGHT : {
     PRIMARY_TEXT: '',
     TEXT : 'rgb(10, 10, 10)',    // yo!check!
@@ -22,5 +22,9 @@ export default {
     DARK: 'rgb(40, 10, 60)',
     DARKER: 'rgb(20, 5, 30)',
     YETDARKER: 'rgb(10, 2, 15)',
-  }
+  },
 }
+
+const COLORS = {}
+
+export {COLORS, THEME}
