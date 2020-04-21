@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet} from 'react-native';
 import { Left, Right } from 'native-base';
 import { Appearance } from 'react-native-appearance';
-import COLORS from '../constants/Color';
+import { THEME } from '../constants/Color';
 
 const styles = StyleSheet.create({
   container: {
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     marginRight: '10%',
   },
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark' ? COLORS.SUBSUKE.TEXT : COLORS.LIGHT.TEXT,
+    color: Appearance.getColorScheme() === 'dark' ? THEME.DARK.TEXT : THEME.LIGHT.TEXT,
   }
 });
 

@@ -5,8 +5,9 @@ import { Appearance } from 'react-native-appearance';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import StyledText from "../components/StyledText";
-import Color from "../constants/Color";
+import { THEME } from "../constants/Color";
 import { updateItemAsync } from "../services/SQLRepository";
+import { updateNotification } from "../services/NotificationServerRepository";
 
 
 export default class DetailScreen extends Component {
@@ -14,6 +15,7 @@ export default class DetailScreen extends Component {
   constructor(props) {
     super(props);
     this.state = this.props.navigation.state.params.params;
+    this.token = this.props.navigation.state.params.token;
     this.actions = this.props.navigation.actions;
     this.theme = this.props.screenProps.theme;
   }
@@ -27,6 +29,7 @@ export default class DetailScreen extends Component {
   };
 
   reflectChanges = () => {
+    updateNotification(this.token, this.state);
     updateItemAsync(this.state)
     .then( () => this.props.navigation.goBack())
     .then( () => this.props.navigation.state.params.onUpdated());
@@ -38,7 +41,7 @@ export default class DetailScreen extends Component {
         <Header style={styles.header} transparent={true} iosBarStyle={Appearance.getColorScheme()==='dark'?'#fff':'#000'}>
           <Left>
             <Button transparent onPress={ () => this.props.navigation.goBack() } >
-              <Icon name="chevron-left" size={28} color={Color[this.theme].TEXT} />
+              <Icon name="chevron-left" size={28} color={THEME[this.theme].TEXT} />
               <StyledText theme={this.theme}>Back</StyledText>
             </Button>
           </Left>
