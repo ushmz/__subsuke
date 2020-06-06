@@ -6,11 +6,14 @@ import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Root } from 'native-base';
 import { Ionicons } from '@expo/vector-icons';
 import { Appearance, AppearanceProvider } from 'react-native-appearance';
-import * as SecureStore from 'expo-secure-store';
 
 import AppNavigator from './navigation/AppNavigator';
 
-export default function App(props) {
+type Props = {
+  skipLoadingScreen: boolean
+}
+
+export default function App(props: Props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
 
   if (!isLoadingComplete && !props.skipLoadingScreen) {
@@ -18,7 +21,7 @@ export default function App(props) {
       <AppearanceProvider>
         <AppLoading
           startAsync={loadResourcesAsync}
-          onError={handleLoadingError}
+          //onError={handleLoadingError}
           onFinish={() => handleFinishLoading(setLoadingComplete)}
         />
       </AppearanceProvider>
@@ -53,18 +56,14 @@ async function loadResourcesAsync() {
   ]);
 }
 
-function handleLoadingError(error) {
+function handleLoadingError(error: string): void {
   // In this case, you might want to report the error to your error reporting
   // service, for example Sentry
   console.warn(error);
 }
 
-function handleFinishLoading(setLoadingComplete) {
+function handleFinishLoading(setLoadingComplete: (flag: boolean) => void): void {
   setLoadingComplete(true);
-}
-
-function setTheme(theme) {
-
 }
 
 const styles = StyleSheet.create({
