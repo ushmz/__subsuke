@@ -20,3 +20,5 @@ build/
 
 db.json
 *services.json
+
+*.bak
