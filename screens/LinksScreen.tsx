@@ -1,7 +1,7 @@
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
-import { ScrollView, StyleSheet, View, ImageSourcePropType} from 'react-native';
-import { Body, Header, Image, Left, Right, Text, Title } from 'native-base';
+import { ScrollView, StyleSheet, View} from 'react-native';
+import { Body, Header, Left, Right, Text, Title } from 'native-base';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Touchable from 'react-native-platform-touchable';
 import { Appearance } from 'react-native-appearance';
@@ -18,7 +18,23 @@ export default function LinksScreen() {
         <Right />          
       </Header>
       <ScrollView style={[styles.container, styles.bgScheme]}>
-        <LinksView iconName={'emoticon-wink-outline'} title={'Sorry! I\'m coding. Coming soon!'} link={'hoge'}/>
+        <Text style={[styles.txtScheme, styles.titleText]}>Links</Text>
+        <Touchable
+          style={styles.link}
+          background={Touchable.Ripple('#000', false)}
+          onPress={()=>{WebBrowser.openBrowserAsync('')}}>
+            <View style={{flexDirection: 'row'}}>
+              <View>
+                <Icon
+                  name={'emoticon-wink-outline'}
+                  color={Appearance.getColorScheme() === 'dark' ? '#fff' : '#000'}
+                  size={22} />
+                </View>
+              <View style={{marginLeft: 9}}>
+                <Text style={[styles.txtScheme, styles.linkText]}>{'Sorry! I\'m coding. Coming soon!'}</Text>
+              </View>  
+            </View>
+        </Touchable>
       </ScrollView>
     </View>
   );
@@ -26,44 +42,6 @@ export default function LinksScreen() {
 
 LinksScreen.navigationOptions = {
   title: 'Links',
-};
-
-let LinksView = (title: string, link: string, icon?: string | ImageSourcePropType): JSX.Element => {
-  /*
-  if (typeof icon === "string"){
-    let imageElem = <Icon
-                      name={icon}
-                      color={Appearance.getColorScheme() === 'dark' ? '#fff' : '#000'}
-                      size={22} />
-  } else if (typeof icon === 'ImageSourcePropType' {
-    <Image
-      source={icon}
-      resizeMode="contain"
-      fadeDuration={0}
-      style={{ width: 20, height: 20, marginTop: 1 }} />
-  }
-  */
-  return (
-    <View>
-      <Text style={[styles.txtScheme, styles.titleText]}>Links</Text>
-      <Touchable
-        style={styles.link}
-        background={Touchable.Ripple('#000', false)}
-        onPress={()=>{WebBrowser.openBrowserAsync(link)}}>
-          <View style={{flexDirection: 'row'}}>
-            <View>
-              <Icon
-                name={icon}
-                color={Appearance.getColorScheme() === 'dark' ? '#fff' : '#000'}
-                size={22} />
-              </View>
-            <View style={{marginLeft: 9}}>
-              <Text style={[styles.txtScheme, styles.linkText]}>{title}</Text>
-            </View>  
-          </View>
-      </Touchable>
-    </View>
-  );
 };
 
 const styles = StyleSheet.create({
