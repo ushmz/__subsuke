@@ -6,6 +6,21 @@ interface Theme {
     [name: string]: Color
 }
 
+const tintColor = '#2f95dc';
+
+const defaultColor: Color = {
+  tintColor,
+  tabIconDefault: '#ccc',
+  tabIconSelected: tintColor,
+  tabBar: '#fefefe',
+  errorBackground: 'red',
+  errorText: '#fff',
+  warningBackground: '#EAEB5E',
+  warningText: '#666804',
+  noticeBackground: tintColor,
+  noticeText: '#fff',
+};
+
 const THEME: Theme = {
     LIGHT : {
         PRIMARY_TEXT: '',
@@ -33,4 +48,4 @@ const THEME: Theme = {
       },  
 }
   
-export {THEME}
+export {defaultColor, THEME}

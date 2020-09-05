@@ -1,25 +1,25 @@
 import React, { Component } from 'react';
-import {
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-
-import {
-  Form,
-  Icon,
-  Input,
-  Item,
-  Label,
-} from 'native-base';
+import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { Form, Icon, Input, Item, Label } from 'native-base';
 
 import Modal from 'react-native-modalbox';
 
 export default class AddModal extends Component {
+  
+  constructor(props: Readonly<{}>) {
+    super(props);
+    this.state = {
+      service: '', 
+      price: '', 
+      cycle: '月', 
+      due: new Date(), 
+      isVisible: false
+    }
+  }
+
   render() {
     return (
       <Modal style={styles.modal} position={'bottom'} ref={'addModal'}>
-        {/* Header */}
         <View style={{flex: 0.2, flexDirection: "row", backgroundColor: 'red'}}>
           <Icon style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} type="Entypo" name="cross" onPress={() => this.refs.addModal.close()}></Icon>
           <View style={{flex: 0.8}} >
@@ -58,3 +58,25 @@ export default class AddModal extends Component {
     )
   }
 }
+interface Style {
+  button: ViewStyle,
+  modal: ViewStyle
+}
+
+const styles = StyleSheet.create<Style>({
+  button: {
+    backgroundColor: 'rgb(93, 43, 136)',
+    minHeight: '70%',
+    marginTop: 'auto',
+    marginBottom: 'auto',
+    minWidth: '4%',
+    marginLeft: 'auto',
+    marginRight: 'auto',    
+    borderRadius: 10,
+  },
+  modal: {
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(20, 5, 30)' : 'rgb(242,242,242)',
+    height: '75%',
+    borderTopStartRadius: 10,
+  }
+})

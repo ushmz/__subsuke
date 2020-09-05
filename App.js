@@ -9,11 +9,7 @@ import { Appearance, AppearanceProvider } from 'react-native-appearance';
 
 import AppNavigator from './navigation/AppNavigator';
 
-type Props = {
-  skipLoadingScreen: boolean
-}
-
-export default function App(props: Props) {
+export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
 
   if (!isLoadingComplete && !props.skipLoadingScreen) {
@@ -56,13 +52,13 @@ async function loadResourcesAsync() {
   ]);
 }
 
-function handleLoadingError(error: string): void {
+function handleLoadingError(error) {
   // In this case, you might want to report the error to your error reporting
   // service, for example Sentry
   console.warn(error);
 }
 
-function handleFinishLoading(setLoadingComplete: (flag: boolean) => void): void {
+function handleFinishLoading(setLoadingComplete) {
   setLoadingComplete(true);
 }
 

@@ -25,26 +25,102 @@ import {
 } from 'native-base';
 
 import { Appearance } from 'react-native-appearance';
+
+// Not founnd @types
+// lack of dependency
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+//Not found @types
+import Swipeout from 'react-native-swipeout';
+
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Modal from 'react-native-modalbox';
-import Swipeout from 'react-native-swipeout';
 import Swiper from 'react-native-swiper';
 
 import NotificationHandler from '../components/NotificationHandler';
 import registerForPushNotificationsAsync from '../components/NotificationRegister'
 import SubsucItem from '../components/SubscItem';
-import { COLORS, THEME } from '../constants/Color';
+import { THEME } from '../constants/Colors';
 import totalCost from '../services/totalCost';
-import { createDBIfNotExistAsync, selectAllAsync, insertItemAsync, deleteItemByRowidAsync } from '../services/SQLRepository';
+import {
+  createDBIfNotExistAsync, 
+  selectAllAsync, 
+  insertItemAsync, 
+  deleteItemByRowidAsync 
+} from '../services/SQLRepository';
 import { registNotification, deleteNotification } from '../services/NotificationServerRepository';
 
-export default class HomeScreen extends Component {
+// import for type
+import {SQLResultSetRowList} from 'expo-sqlite';
+
+interface UserItem extends SQLResultSetRowList {
+  service: string,
+  price: string,
+  cycle: string,
+  due: Date
+}
+
+class UserItemList implements SQLResultSetRowList {
   
-  constructor(props) {
+  private itemList: Array<UserItem>;
+  length: number;
+  
+  constructor(rs?: SQLResultSetRowList) {
+    this.itemList = new Array<UserItem>();
+    this.length = this.itemList.length;
+    if(rs) {
+      this.convert(rs);
+    }
+  }
+
+  item = (index: number) => {
+    return this.itemList[index]
+  }
+
+  convert = (rs: SQLResultSetRowList) => {
+    for(let i = 0; i < rs.length; i++) {
+      this.itemList.push(rs.item(i));
+    }
+  }
+
+  addItem = (item: UserItem) {
+    this.itemList.push(item);
+    this.length = this.itemList.length;
+  }
+}
+
+interface HomeScreenProps {
+}
+
+interface HomescreenState {
+  list?: SQLResultSetRowList,
+  service?: string,
+  price?: string,
+  cycle?: string,
+  due?: Date,
+  isVisible?: Boolean,
+  token?: string
+}
+
+interface AdditionalTempState {
+  list?: SQLResultSetRowList,
+  service?: string,
+  price?: string,
+  cycle?: string,
+  year?: number,
+  month?: number,
+  date?: number,
+  due?: Date,
+  isVisible?: Boolean,
+  token?: string
+}
+
+export default class HomeScreen extends React.Component<HomeScreenProps, HomescreenState> {
+  
+  constructor(props: HomeScreenProps) {
     super(props);
-    this.state = {list: {_array: [], length: 0}, service: '', price: '', cycle: '月', due: new Date(), isVisible: false, token: ''};
+    this.state = {list: new UserItemList(), service: '', price: '', cycle: '月', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
+    this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
     this.theme = props.screenProps.theme;
     //this.theme = Appearance.getColorScheme();
     this.handler = new NotificationHandler();
@@ -61,16 +137,17 @@ export default class HomeScreen extends Component {
     console.log('start DBSync...');
 
     createDBIfNotExistAsync()
-    .then( _ => selectAllAsync() )
-    .then( resolved => {
+    .then( (_: any) => selectAllAsync() )
+    .then( (resolved: any) => {
       this.setState({list: resolved});
       console.log('sync complete.');
     });
 
-    registerForPushNotificationsAsync().then((token) => {
+    registerForPushNotificationsAsync().then((token: string) => {
       if (token===undefined) {token = 'thisissimulator'};
       this.setState({token: token});
-    }).catch((error) => {
+    }).catch((error: Error) => {
+      console.log(error);
       this.setState({token: 'thisissimulator'});
     });  
   }
@@ -81,7 +158,7 @@ export default class HomeScreen extends Component {
      * 入力フォームの内容をデータベースに登録，通知サーバーに登録
      * 追加した内容でStateを更新，入力フォームの内容をリセット
      */
-    if (this.state.service === '' | this.state.price === '' | this.state.cycle === '') {
+    if (this.state.service === '' || this.state.price === '' || this.state.cycle === '' || this.state.due === undefined) {
       Toast.show({
         text: '未入力の項目があります。',
         buttonText: 'OK',
@@ -92,7 +169,7 @@ export default class HomeScreen extends Component {
       return;
     }
 
-    const additional = {
+    const additional: AdditionalTempState = {
       token: this.state.token,
       service: this.state.service,
       price: this.state.price,
@@ -118,7 +195,7 @@ export default class HomeScreen extends Component {
     this.refs.addModal.close();
   }
 
-  _onDelete = (rowid) => {
+  _onDelete = (rowid: number) => {
     /**
      * アプリでのリスト上のリストのアイテムの削除時に呼び出される関数．
      * データベースから削除，通知サーバーから削除
