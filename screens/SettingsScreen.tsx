@@ -3,7 +3,7 @@ import {SectionList, StyleSheet, Text, View, SectionListData} from 'react-native
 import { Appearance } from 'react-native-appearance';
 import { Header, Body, Left, Right, Title } from 'native-base';
 
-import { THEME } from '../constants/Colors';
+import { theme } from '../constants/ColorSets';
 
 export default function SettingsScreen() {
   /**
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   sectionHeaderContainer: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? THEME.SUBSUKE.YETDARKER : THEME.LIGHT.YETDARKER,
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? theme.subsuke.yetDarker : theme.light.yetDarker,
     paddingVertical: 8,
     paddingHorizontal: 15,
     //borderWidth: StyleSheet.hairlineWidth,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     color: Appearance.getColorScheme() === 'dark' ? 'rgb(200, 200, 200)' : '#000',
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? THEME.SUBSUKE.DARKER : THEME.LIGHT.DARKER,
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? theme.subsuke.darker : theme.light.darker,
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'

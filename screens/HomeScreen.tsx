@@ -33,14 +33,14 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import Swipeout from 'react-native-swipeout';
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Modal from 'react-native-modalbox';
+import Modal from 'react-native-modal';
 import Swiper from 'react-native-swiper';
 
 import NotificationHandler from '../components/NotificationHandler';
 import registerForPushNotificationsAsync from '../components/NotificationRegister'
 import SubsucItem from '../components/SubscItem';
-import { THEME } from '../constants/Colors';
-import totalCost from '../services/totalCost';
+import { theme } from '../constants/ColorSets';
+import { totalCost } from '../services/totalCost';
 import {
   createDBIfNotExistAsync, 
   selectAllAsync, 
@@ -49,8 +49,11 @@ import {
 } from '../services/SQLRepository';
 import { registNotification, deleteNotification } from '../services/NotificationServerRepository';
 
+import ScreenProps from "./ScreenProps";
+
 // import for type
 import {SQLResultSetRowList} from 'expo-sqlite';
+import AddModal from 'components/AddModal';
 
 interface UserItem extends SQLResultSetRowList {
   service: string,
@@ -89,6 +92,7 @@ class UserItemList implements SQLResultSetRowList {
 }
 
 interface HomeScreenProps {
+  screenProps: ScreenProps;
 }
 
 interface HomescreenState {
@@ -115,14 +119,15 @@ interface AdditionalTempState {
 }
 
 export default class HomeScreen extends React.Component<HomeScreenProps, HomescreenState> {
+  PUSH_ENDPOINT: string;
+  theme: any;
+  handler: any;
   
   constructor(props: HomeScreenProps) {
     super(props);
     this.state = {list: new UserItemList(), service: '', price: '', cycle: '月', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
-    this.theme = props.screenProps.theme;
-    //this.theme = Appearance.getColorScheme();
     this.handler = new NotificationHandler();
   }
 
@@ -163,7 +168,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
         text: '未入力の項目があります。',
         buttonText: 'OK',
         type: 'warning',
-        textStyle: {color: THEME.DARK.TEXT},
+        textStyle: {color: theme.dark.text},
         style: {backgroundColor: 'rgb(65,65,65)'}
       });
       return;
@@ -258,12 +263,14 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
     return minimumDate;
   }
 
+  
   render() {
     /**
      * レンダー関数
      */
     const itemList = this.state.list;
     let totals = totalCost(itemList);
+    const AddingModal = new Modal({position:'bottom', style:styles.modal});
 
 
     let UserFlatlist = () => {
@@ -277,7 +284,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
         if (itemList.length !== 0) {
           return (
             <FlatList
-              data={itemList?.item}
+              data={itemList.item}
               style={[styles.flatlist, styles.bgScheme]}
               keyExtractor={item => item.rowid.toString()}
               renderItem={({item}) => {
@@ -292,8 +299,9 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
                     <Swipeout right={swipeBtn} autoClose={true} backgroundColor='transparent'>
                       <TouchableOpacity
                           onPress={ () => {
-                            this.props.navigation.navigate('Detail', {token: this.state.token, params: item, onUpdated: this._onUpdated})}
-                          }>
+                            this.props.screenProps.navigation.navigate('Detail', {token: this.state.token, params: item, onUpdated: this._onUpdated})
+                            //this.props.navigation.navigate('Detail', {token: this.state.token, params: item, onUpdated: this._onUpdated})
+                          }}>
                         <SubsucItem {...item} />
                       </TouchableOpacity>
                     </Swipeout>
@@ -311,7 +319,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
         <Header style={styles.header} transparent={true} iosBarStyle={this.theme==='dark'?'#fff':'#000'}>
           <Left />
           <Body>
-            <Title style={{color: THEME[this.theme].TEXT}}>Subsuke</Title>
+            <Title style={{color: theme[this.theme].text}}>Subsuke</Title>
           </Body>
           <Right />
           
@@ -333,22 +341,22 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
 
         <UserFlatlist />
         
-        {/*Modal Contents*/}
-        <Modal style={styles.modal} position={'bottom'}  ref={'addModal'}>
+        {/* TODO Change react-native-modalbox to react-native-modal*/}
+        <Modal position={'bottom'} style={styles.modal} ref={'addmodal'}>
           {/* Header */}
           <View style={{flex: 0.2, flexDirection: "row"}}>
             <Icon 
               style={{marginTop: 'auto', marginBottom: 'auto', flex:0.1}} 
               name="close"
               size={32}
-              color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}
-              onPress={() => this.refs.addModal.close()}></Icon>
+              color={Appearance.getColorScheme()==='dark'?theme.subsuke.text:theme.LIGHT.text}
+              onPress={() => this.refs AddingModal.close()}></Icon>
             <View style={{flex: 0.8}} >
               <Icon
                 style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}}
                 name="chevron-down"
                 size={32}
-                color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}></Icon>
+                color={Appearance.getColorScheme()==='dark'?theme.subsuke.text:theme.LIGHT.text}></Icon>
             </View>
             <TouchableOpacity style={[styles.button, {flex: 0.1, marginRight: '1%'}]} onPress={this._onPressAdd} >
               <Text style={{color: 'white', fontSize: 18, textAlign: 'center', marginTop: 15}}>追加</Text>
@@ -367,20 +375,20 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
               <Item >
-                <Label><Icon name="wallet" size={32} color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}></Icon></Label>
+                <Label><Icon name="wallet" size={32} color={Appearance.getColorScheme()==='dark'?theme.subsuke.text:theme.LIGHT.text}></Icon></Label>
                 <TextInput 
                        type="number"
                        keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
                        name={"price"}
                        style={[{width: '80%',fontSize: 24, margin: 10}, styles.txtScheme]}
                        placeholder={"金額を追加"}
-                       placeholderTextColor={THEME.SUBSUKE.TEXT}
+                       placeholderTextColor={theme.subsuke.text}
                        value={this.state.price}
                        onChange={e => {this.setState({price: e.nativeEvent.text})}} />
               </Item>
 
               <Item Picker>
-                <Label><Icon name="cached" size={32} color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}></Icon></Label>
+                <Label><Icon name="cached" size={32} color={Appearance.getColorScheme()==='dark'?theme.subsuke.text:theme.LIGHT.text}></Icon></Label>
                 <Picker 
                   itemStyle={styles.bgScheme}
                   iosHeader={'支払いサイクル'}
@@ -405,7 +413,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
 
               <View>
                 <Item >
-                  <Label><Icon name="calendar" size={32} color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}></Icon></Label>
+                  <Label><Icon name="calendar" size={32} color={Appearance.getColorScheme()==='dark'?theme.subsuke.text:theme.LIGHT.text}></Icon></Label>
                   <View style={{flexDirection:'column', marginTop:5, marginLeft:10}}>
                     <Text style={styles.txtScheme}>次のお支払日</Text>
                     <Button transparent onPress={() => {this.setState({isVisible: true})}}>
@@ -437,7 +445,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
           <TouchableOpacity
             style={styles.circleButton}
             onPress={() => {
-              this.refs.addModal.open();
+              AddingModal.open();
               this.setState({
                 service: '', 
                 price: '', 
@@ -453,43 +461,40 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
   }
 }
 
-HomeScreen.navigationOptions = {
-  header: null,
-};
+// function DevelopmentModeNotice() {
+//   if (__DEV__) {
+//     const learnMoreButton = (
+//       <Text onPress={handleLearnMorePress} style={styles.helpLinkText}>
+//         Learn more
+//       </Text>
+//     );
 
-function DevelopmentModeNotice() {
-  if (__DEV__) {
-    const learnMoreButton = (
-      <Text onPress={handleLearnMorePress} style={styles.helpLinkText}>
-        Learn more
-      </Text>
-    );
+//     return (
+//       <Text style={styles.developmentModeText}>
+//         Development mode is enabled: your app will be slower but you can use
+//         useful development tools. {learnMoreButton}
+//       </Text>
+//     );
+//   } else {
+//     return (
+//       <Text style={styles.developmentModeText}>
+//         You are not in development mode: your app will run at full speed.
+//       </Text>
+//     );
+//   }
+// }
 
-    return (
-      <Text style={styles.developmentModeText}>
-        Development mode is enabled: your app will be slower but you can use
-        useful development tools. {learnMoreButton}
-      </Text>
-    );
-  } else {
-    return (
-      <Text style={styles.developmentModeText}>
-        You are not in development mode: your app will run at full speed.
-      </Text>
-    );
-  }
-}
+// function handleLearnMorePress() {
+//   WebBrowser.openBrowserAsync(
+//     'https://docs.expo.io/versions/latest/workflow/development-mode/'
+//   );
+// }
 
-function handleLearnMorePress() {
-  WebBrowser.openBrowserAsync(
-    'https://docs.expo.io/versions/latest/workflow/development-mode/'
-  );
-}
-
-function handleHelpPress() {
-  WebBrowser.openBrowserAsync(
-    'https://docs.expo.io/versions/latest/workflow/up-and-running/#cant-see-your-changes'
-  );
+// function handleHelpPress() {
+//   WebBrowser.openBrowserAsync(
+//     'https://docs.expo.io/versions/latest/workflow/up-and-running/#cant-see-your-changes'
+//   );
+// }
 }
 
 const styles = StyleSheet.create({
@@ -580,10 +585,10 @@ const styles = StyleSheet.create({
   
   // user settings
   txtScheme: {
-    color: Appearance.getColorScheme() === 'dark' ? THEME.SUBSUKE.TEXT : THEME.LIGHT.TEXT,
+    color: Appearance.getColorScheme() === 'dark' ? theme.subsuke.text : theme.LIGHT.text,
   },
   bgScheme: {
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? THEME.SUBSUKE.DARKER : 'rgb(242,242,242)',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? theme.subsuke.darker : 'rgb(242,242,242)',
   },
   uiScheme: {
     backgroundColor: Appearance.getColorScheme() === 'dark' ? '#000' : '#fff'
@@ -593,7 +598,7 @@ const styles = StyleSheet.create({
   },
   flatlist: {
     flex: 1.0,
-    backgroundColor: Appearance.getColorScheme() === 'dark' ? THEME.SUBSUKE.DARKER : '#fff',
+    backgroundColor: Appearance.getColorScheme() === 'dark' ? theme.subsuke.darker : '#fff',
     borderTopWidth: 1,
     borderTopColor: Appearance.getColorScheme() === 'dark' ? 'rgb(90, 90, 90)' : '#000',
   },
@@ -619,6 +624,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 20,
   },
+  modal: {},
   right: {
     width: '10%',
     //alignItems: 'flex-end',
@@ -631,7 +637,7 @@ const styles = StyleSheet.create({
     backgroundColor: Appearance.getColorScheme() === 'dark' ? 'rgb(10, 2, 15)' : 'rgb(232,232,232)'
   },
   _swiper: {
-    //backgroundColor: THEME[DefaultPreference.get('theme')].YETDARKER,
+    //backgroundColor: theme[DefaultPreference.get('theme')].yetDarker,
   },
   textInput: {
     borderRadius: 10,

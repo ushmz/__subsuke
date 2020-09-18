@@ -1,4 +1,4 @@
-function totalCost(items: Item): any {
+export function totalCost(items: Item): any {
   let weekly: number = 0;
   let monthly: number = 0;
   let yearly: number = 0;
