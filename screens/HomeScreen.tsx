@@ -82,7 +82,7 @@ class UserItemList implements SQLResultSetRowList {
     }
   }
 
-  addItem = (item: UserItem) {
+  addItem = (item: UserItem) => {
     this.itemList.push(item);
     this.length = this.itemList.length;
   }
@@ -227,7 +227,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
     })
   }
 
-  setValue = (stateName, value) => {
+  setValue = (stateName: string, value: any) => {
     /**
      * フォームの内容の変更時に呼び出される．
      * 第1引数の名前のstateの値を第2引数の値で更新する．
@@ -235,16 +235,21 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
     this.setState({[stateName]: value});
   };
 
-  handleConfirm = date => {
+  handleConfirm = (date: Date) => {
     this.setState({isVisible: false});
     this.setState({due: date});
   };
 
-  formatDate = () => {
+  formatDate = (due: Date|undefined) => {
     /**
+     * TODO : Null handling
      * State(due)のデータオブジェクトを日本語表記にフォーマットする．
      */
-    return this.state.due.getFullYear() + "年 " + (this.state.due.getMonth()+1) + "月 " + (this.state.due.getDate()+1) + "日"
+    if (due){
+      return due.getFullYear() + "年 " + (due.getMonth()+1) + "月 " + (due.getDate()+1) + "日";
+    } else {
+      return undefined;
+    }
   }
 
   getMinimumDate() {
@@ -262,42 +267,43 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
 
 
     let UserFlatlist = () => {
-      if (itemList.length !== 0) {
-        return (
-          <FlatList
-            data={itemList._array}
-            style={[styles.flatlist, styles.bgScheme]}
-            keyExtractor={item => item.rowid.toString()}
-            renderItem={({item}) => {
-              const swipeBtn = [{
-                text: '削除',
-                backgroundColor: 'red',
-                underlayColor: 'rgba(0,0,0,1)',
-                onPress: () => {this._onDelete(item.rowid.toString())},
-              }];
-              return (
-                <View>
-                  <Swipeout right={swipeBtn} autoClose={true} backgroundColor='transparent'>
-                    <TouchableOpacity
-                        onPress={ () => {
-                          this.props.navigation.navigate('Detail', {token: this.state.token, params: item, onUpdated: this._onUpdated})}
-                        }>
-                      <SubsucItem {...item} />
-                    </TouchableOpacity>
-                  </Swipeout>
-                </View>
-              );
-            }}
-          />
-        )
-      } else {
+      if (!itemList) {
         /**
          * Would like to insert image...
          */
         //return <StyledText style={{textAlign: 'center', fontSize: 18, marginTop: 10}} theme={'SUBSUKE'}>登録済みのサービスはありません</StyledText>
         return <Text style={[{textAlign: 'center', fontSize: 18, marginTop: 10}, styles.txtScheme]}>登録済みのサービスはありません</Text>            
+      } else {
+        if (itemList.length !== 0) {
+          return (
+            <FlatList
+              data={itemList?.item}
+              style={[styles.flatlist, styles.bgScheme]}
+              keyExtractor={item => item.rowid.toString()}
+              renderItem={({item}) => {
+                const swipeBtn = [{
+                  text: '削除',
+                  backgroundColor: 'red',
+                  underlayColor: 'rgba(0,0,0,1)',
+                  onPress: () => {this._onDelete(item.rowid.toString())},
+                }];
+                return (
+                  <View>
+                    <Swipeout right={swipeBtn} autoClose={true} backgroundColor='transparent'>
+                      <TouchableOpacity
+                          onPress={ () => {
+                            this.props.navigation.navigate('Detail', {token: this.state.token, params: item, onUpdated: this._onUpdated})}
+                          }>
+                        <SubsucItem {...item} />
+                      </TouchableOpacity>
+                    </Swipeout>
+                  </View>
+                );
+              }}
+            />
+          )
+        }
       }
-    }
 
     return (
       <View style={[styles.bgScheme, {flex: 1}]}>
@@ -362,7 +368,8 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
               </Item>
               <Item >
                 <Label><Icon name="wallet" size={32} color={Appearance.getColorScheme()==='dark'?THEME.SUBSUKE.TEXT:THEME.LIGHT.TEXT}></Icon></Label>
-                <TextInput type="number"
+                <TextInput 
+                       type="number"
                        keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
                        name={"price"}
                        style={[{width: '80%',fontSize: 24, margin: 10}, styles.txtScheme]}
@@ -402,8 +409,8 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
                   <View style={{flexDirection:'column', marginTop:5, marginLeft:10}}>
                     <Text style={styles.txtScheme}>次のお支払日</Text>
                     <Button transparent onPress={() => {this.setState({isVisible: true})}}>
-                        <Text style={{fontSize: 18}, styles.txtScheme} >
-                          {this.formatDate()}
+                        <Text style={styles.txtScheme} >
+                          {this.formatDate(this.state.due)}
                         </Text>
                     </Button>
                     <DateTimePickerModal
