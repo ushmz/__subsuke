@@ -53,7 +53,6 @@ import ScreenProps from "./ScreenProps";
 
 // import for type
 import {SQLResultSetRowList} from 'expo-sqlite';
-import AddModal from 'components/AddModal';
 
 interface UserItem extends SQLResultSetRowList {
   service: string,
@@ -62,12 +61,13 @@ interface UserItem extends SQLResultSetRowList {
   due: Date
 }
 
-class UserItemList implements SQLResultSetRowList {
+class UserItemList extends Array<UserItem> {
   
   private itemList: Array<UserItem>;
   length: number;
   
   constructor(rs?: SQLResultSetRowList) {
+    super();
     this.itemList = new Array<UserItem>();
     this.length = this.itemList.length;
     if(rs) {
@@ -77,6 +77,10 @@ class UserItemList implements SQLResultSetRowList {
 
   item = (index: number) => {
     return this.itemList[index]
+  }
+
+  items = () => {
+    return this.itemList;
   }
 
   convert = (rs: SQLResultSetRowList) => {
@@ -120,7 +124,6 @@ interface AdditionalTempState {
 
 export default class HomeScreen extends React.Component<HomeScreenProps, HomescreenState> {
   PUSH_ENDPOINT: string;
-  theme: any;
   handler: any;
   
   constructor(props: HomeScreenProps) {
@@ -128,6 +131,8 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
     this.state = {list: new UserItemList(), service: '', price: '', cycle: '月', due: new Date(), isVisible: false, token: ''};
     this.setValue = this.setValue.bind(this);
     this.PUSH_ENDPOINT = 'https://subsuke-notification-server.herokuapp.com/notification';
+    // this.theme = props.screenProps.theme;
+    //this.theme = Appearance.getColorScheme();
     this.handler = new NotificationHandler();
   }
 
@@ -149,7 +154,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
     });
 
     registerForPushNotificationsAsync().then((token: string) => {
-      if (token===undefined) {token = 'thisissimulator'};
+      if (!token) {token = 'thisissimulator'};
       this.setState({token: token});
     }).catch((error: Error) => {
       console.log(error);
@@ -163,7 +168,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
      * 入力フォームの内容をデータベースに登録，通知サーバーに登録
      * 追加した内容でStateを更新，入力フォームの内容をリセット
      */
-    if (this.state.service === '' || this.state.price === '' || this.state.cycle === '' || this.state.due === undefined) {
+    if (!this.state.service || !this.state.price || !this.state.cycle || !this.state.due) {
       Toast.show({
         text: '未入力の項目があります。',
         buttonText: 'OK',
@@ -263,7 +268,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
     return minimumDate;
   }
 
-  
+
   render() {
     /**
      * レンダー関数
@@ -274,17 +279,11 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
 
 
     let UserFlatlist = () => {
-      if (!itemList) {
-        /**
-         * Would like to insert image...
-         */
-        //return <StyledText style={{textAlign: 'center', fontSize: 18, marginTop: 10}} theme={'SUBSUKE'}>登録済みのサービスはありません</StyledText>
-        return <Text style={[{textAlign: 'center', fontSize: 18, marginTop: 10}, styles.txtScheme]}>登録済みのサービスはありません</Text>            
-      } else {
+      if (itemList) {
         if (itemList.length !== 0) {
           return (
             <FlatList
-              data={itemList.item}
+              data={itemList.item()}
               style={[styles.flatlist, styles.bgScheme]}
               keyExtractor={item => item.rowid.toString()}
               renderItem={({item}) => {
@@ -299,9 +298,8 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
                     <Swipeout right={swipeBtn} autoClose={true} backgroundColor='transparent'>
                       <TouchableOpacity
                           onPress={ () => {
-                            this.props.screenProps.navigation.navigate('Detail', {token: this.state.token, params: item, onUpdated: this._onUpdated})
-                            //this.props.navigation.navigate('Detail', {token: this.state.token, params: item, onUpdated: this._onUpdated})
-                          }}>
+                            this.props.navigation.navigate('Detail', {token: this.state.token, params: item, onUpdated: this._onUpdated})}
+                          }>
                         <SubsucItem {...item} />
                       </TouchableOpacity>
                     </Swipeout>
@@ -310,8 +308,22 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
               }}
             />
           )
+        } else {
+          /**
+           * Would like to insert image...
+           */
+          //return <StyledText style={{textAlign: 'center', fontSize: 18, marginTop: 10}} theme={'SUBSUKE'}>登録済みのサービスはありません</StyledText>
+          return <Text style={[{textAlign: 'center', fontSize: 18, marginTop: 10}, styles.txtScheme]}>登録済みのサービスはありません</Text>            
         }
+      } else {
+          /**
+           * Would like to insert image...
+           */
+          //return <StyledText style={{textAlign: 'center', fontSize: 18, marginTop: 10}} theme={'SUBSUKE'}>登録済みのサービスはありません</StyledText>
+          return <Text style={[{textAlign: 'center', fontSize: 18, marginTop: 10}, styles.txtScheme]}>登録済みのサービスはありません</Text>            
+
       }
+    }
 
     return (
       <View style={[styles.bgScheme, {flex: 1}]}>
@@ -341,8 +353,8 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
 
         <UserFlatlist />
         
-        {/* TODO Change react-native-modalbox to react-native-modal*/}
-        <Modal position={'bottom'} style={styles.modal} ref={'addmodal'}>
+        {/*Modal Contents*/}
+        <Modal style={styles.modal} position={'bottom'}  ref={'addModal'}>
           {/* Header */}
           <View style={{flex: 0.2, flexDirection: "row"}}>
             <Icon 
@@ -350,7 +362,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
               name="close"
               size={32}
               color={Appearance.getColorScheme()==='dark'?theme.subsuke.text:theme.LIGHT.text}
-              onPress={() => this.refs AddingModal.close()}></Icon>
+              onPress={() => this.refs.addModal.close()}></Icon>
             <View style={{flex: 0.8}} >
               <Icon
                 style={{marginLeft: "auto", marginRight: 'auto', flex: 0.6}}
@@ -375,7 +387,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
                        onChange={e => {this.setState({service: e.nativeEvent.text})}} />
               </Item>
               <Item >
-                <Label><Icon name="wallet" size={32} color={Appearance.getColorScheme()==='dark'?theme.subsuke.text:theme.LIGHT.text}></Icon></Label>
+              <Label><Icon name="wallet" size={32} color={Appearance.getColorScheme()==='dark'?theme.subsuke.text:theme.LIGHT.text}></Icon></Label>
                 <TextInput 
                        type="number"
                        keyboardType={Platform.select({ios: "number-pad", android: "numeric"})}
@@ -445,7 +457,7 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
           <TouchableOpacity
             style={styles.circleButton}
             onPress={() => {
-              AddingModal.open();
+              this.refs.addModal.open();
               this.setState({
                 service: '', 
                 price: '', 
@@ -494,8 +506,6 @@ export default class HomeScreen extends React.Component<HomeScreenProps, Homescr
 //   WebBrowser.openBrowserAsync(
 //     'https://docs.expo.io/versions/latest/workflow/up-and-running/#cant-see-your-changes'
 //   );
-// }
-}
 
 const styles = StyleSheet.create({
   developmentModeText: {
