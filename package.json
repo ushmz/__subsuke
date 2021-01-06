@@ -27,7 +27,7 @@
     "@types/react": "^16.9.49",
     "@types/react-native": "^0.62.18",
     "analytics-node": "^3.4.0-beta.2",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "babel-preset-expo": "~8.2.3",
     "expo-cli": "^3.27.4",
     "isomorphic-fetch": "^2.2.1",
